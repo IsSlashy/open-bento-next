@@ -46,7 +46,7 @@ A free, open-source alternative to [bento.me](https://bento.me) for creating bea
 
 ```bash
 # Clone the repository
-git clone https://github.com/IsSlashy/open-bento.git
+git clone https://github.com/IsSlashy/open-bento-next.git
 cd open-bento
 
 # Install dependencies
@@ -103,7 +103,7 @@ Since there's no backend yet, you can run this entirely on your local machine:
 
 ```bash
 # Clone, install, and run
-git clone https://github.com/IsSlashy/open-bento.git
+git clone https://github.com/IsSlashy/open-bento-next.git
 cd open-bento
 npm install
 npm run dev
