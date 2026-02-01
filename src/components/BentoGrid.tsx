@@ -4,9 +4,12 @@ import { useCallback, useState, useRef, useEffect } from 'react';
 import {
   DndContext,
   DragEndEvent,
+  DragOverEvent,
   DragOverlay,
   DragStartEvent,
-  closestCenter,
+  pointerWithin,
+  closestCorners,
+  CollisionDetection,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -22,6 +25,13 @@ import { BentoCard, DragOverlayCard } from './BentoCard';
 import { BentoCard as CardType } from '@/lib/types';
 import { Upload } from 'lucide-react';
 import { compressImage } from '@/lib/utils';
+
+// Pointer-first collision: intuitive for mixed-size cards
+const collisionDetection: CollisionDetection = (args) => {
+  const pointerCollisions = pointerWithin(args);
+  if (pointerCollisions.length > 0) return pointerCollisions;
+  return closestCorners(args);
+};
 
 export function BentoGrid() {
   const { cards, reorderCards, addCard } = useBentoStore();
@@ -64,16 +74,18 @@ export function BentoGrid() {
     }
   }, [gridCards]);
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
+  // Live reorder while dragging — gives immediate visual feedback
+  const handleDragOver = useCallback((event: DragOverEvent) => {
     const { active, over } = event;
-
     if (over && active.id !== over.id) {
       reorderCards(active.id as string, over.id as string);
     }
+  }, [reorderCards]);
 
+  const handleDragEnd = useCallback(() => {
     setActiveCard(null);
     setDraggedCardSize({ width: 0, height: 0 });
-  }, [reorderCards]);
+  }, []);
 
   // File drop handler
   const handleFileDrop = useCallback(async (e: React.DragEvent) => {
@@ -153,8 +165,8 @@ export function BentoGrid() {
     }
   }, []);
 
-  // Drag over - prevent default to allow drop
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  // Drag over - prevent default to allow file drop
+  const handleFileDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
@@ -175,7 +187,7 @@ export function BentoGrid() {
     <div
       onDrop={handleFileDrop}
       onDragEnter={handleDragEnter}
-      onDragOver={handleDragOver}
+      onDragOver={handleFileDragOver}
       onDragLeave={handleDragLeave}
     >
       {/* Drop overlay for files */}
@@ -190,8 +202,9 @@ export function BentoGrid() {
 
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCenter}
+        collisionDetection={collisionDetection}
         onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={gridCards.map((c) => c.id)} strategy={rectSortingStrategy}>

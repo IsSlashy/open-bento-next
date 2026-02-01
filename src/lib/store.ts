@@ -146,7 +146,7 @@ async function apiCall(url: string, method: string, body?: unknown) {
 
 export const useBentoStore = create<BentoStore>()(
   (set, get) => ({
-    cards: defaultCards,
+    cards: [],
     profile: defaultProfile,
     selectedCardId: null,
     isEditing: false,
@@ -159,7 +159,7 @@ export const useBentoStore = create<BentoStore>()(
     hydrate: (profile, cards) => {
       set({
         profile,
-        cards: cards.length > 0 ? cards : defaultCards,
+        cards,
         isHydrated: true,
       });
     },
@@ -376,6 +376,6 @@ export const useBentoStore = create<BentoStore>()(
     setShowEditPanel: (show) => set({ showEditPanel: show }),
     setIsDragging: (dragging) => set({ isDragging: dragging }),
 
-    resetCards: () => set({ cards: defaultCards, profile: defaultProfile }),
+    resetCards: () => set({ cards: [], profile: defaultProfile }),
   })
 );
