@@ -14,6 +14,7 @@ export function MediaCard({ cardId, content }: MediaCardProps) {
   const { updateCardContent } = useBentoStore();
   const [isCropping, setIsCropping] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
   const [containerSize, setContainerSize] = useState<{ w: number; h: number } | null>(null);
 
@@ -46,6 +47,14 @@ export function MediaCard({ cardId, content }: MediaCardProps) {
     const img = e.currentTarget;
     setNaturalSize({ w: img.naturalWidth, h: img.naturalHeight });
   }, []);
+
+  // Fallback for cached images that may not fire onLoad
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth > 0 && !naturalSize) {
+      setNaturalSize({ w: img.naturalWidth, h: img.naturalHeight });
+    }
+  });
 
   // Detect GIF
   const isGif = content.type === 'gif' ||
@@ -121,6 +130,7 @@ export function MediaCard({ cardId, content }: MediaCardProps) {
       left: ctrW / 2 - cropCenterX,
       top: ctrH / 2 - cropCenterY,
       maxWidth: 'none',
+      objectFit: 'fill' as const,
     };
   };
 
@@ -165,6 +175,7 @@ export function MediaCard({ cardId, content }: MediaCardProps) {
         />
       ) : (
         <img
+          ref={imgRef}
           src={content.url}
           alt={content.alt || ''}
           className={imgClass}

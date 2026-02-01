@@ -606,6 +606,17 @@ body {
 .bento-card[data-size="6x4"] { grid-column: span 6; grid-row: span 4; }
 .bento-card[data-size="8x4"] { grid-column: span 8; grid-row: span 4; }
 
+/* 4-row cards need explicit min-height because grid-auto-rows:auto
+   collapses rows to content height. Columns get proper width from
+   repeat(8,1fr) but rows have no equivalent — so a 2x4 card would
+   render as a square without this. Title widgets are never 4-row. */
+.bento-card[data-size="2x4"],
+.bento-card[data-size="4x4"],
+.bento-card[data-size="6x4"],
+.bento-card[data-size="8x4"] {
+  min-height: 360px;
+}
+
 /* Title widget card */
 .bento-card.title-widget-card {
   background: transparent;
