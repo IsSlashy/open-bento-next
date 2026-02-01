@@ -134,9 +134,9 @@ export function BentoGrid() {
 
         // Videos & GIFs — read directly (no compression), with size limit
         if (isVideo || isGif) {
-          const MAX_VIDEO_SIZE = 4 * 1024 * 1024; // 4 MB
+          const MAX_VIDEO_SIZE = 150 * 1024 * 1024; // 150 MB
           if (isVideo && file.size > MAX_VIDEO_SIZE) {
-            alert('Video trop volumineuse (max 4 Mo). Utilisez une vidéo plus courte ou compressée.');
+            alert('Vidéo trop volumineuse (max 150 Mo).');
             continue;
           }
           const reader = new FileReader();

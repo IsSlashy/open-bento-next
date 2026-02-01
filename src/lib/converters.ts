@@ -5,7 +5,7 @@ import { BentoCard, CardContent, CardStyle, CardType } from './types';
 // Anything larger was likely a video/file stored inline by mistake and will
 // crash serialisation or the browser.  Strip the URL so the card renders as
 // a broken placeholder the user can delete.
-const MAX_DATA_URL_LENGTH = 6_000_000; // ~4.5 MB binary (base64 overhead)
+const MAX_DATA_URL_LENGTH = 200_000_000; // ~150 MB binary (base64 overhead)
 
 // Convert Prisma Card to client BentoCard
 // Migration from 4-col to 8-col is handled by the store's hydrate function.
