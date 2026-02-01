@@ -1046,6 +1046,7 @@ body {
 .media-card {
   position: relative;
   min-height: 200px;
+  height: 100%;
   background: #f3f4f6;
   overflow: hidden;
   border-radius: 16px;
