@@ -34,14 +34,26 @@ export function clientCardToDb(
   };
 }
 
+// Old defaults to strip for existing users
+const OLD_DEFAULT_TITLE = 'Your Title | Your Role';
+const OLD_DEFAULT_BIO = 'Write something about yourself...';
+const OLD_DEFAULT_TAGS = ['Tag 1', 'Tag 2', 'Tag 3'];
+
 // Convert Prisma Profile to client format
 export function dbProfileToClient(profile: PrismaProfile) {
+  // Strip old default values so placeholders show instead
+  const title = profile.title === OLD_DEFAULT_TITLE ? '' : (profile.title || '');
+  const bio = profile.bio === OLD_DEFAULT_BIO ? '' : (profile.bio || '');
+  const tagsAreOldDefault = profile.tags.length === OLD_DEFAULT_TAGS.length &&
+    profile.tags.every((t, i) => t === OLD_DEFAULT_TAGS[i]);
+  const tags = tagsAreOldDefault ? ['', '', ''] : profile.tags;
+
   return {
     avatar: profile.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default',
     name: profile.displayName,
-    title: profile.title || '',
-    tags: profile.tags,
-    bio: profile.bio || '',
+    title,
+    tags,
+    bio,
   };
 }
 

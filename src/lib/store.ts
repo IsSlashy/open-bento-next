@@ -120,26 +120,38 @@ const defaultCards: BentoCard[] = [
 
 const GRID_COLS = 4;
 
-// Find the first available grid position that fits a card of the given size
-function findNextAvailablePosition(cards: BentoCard[], size: Size): Position {
+// Build occupancy set from cards (optionally excluding some IDs)
+function buildOccupied(cards: BentoCard[], excludeIds: string[] = []): Set<string> {
   const occupied = new Set<string>();
   for (const card of cards) {
+    if (excludeIds.includes(card.id)) continue;
     for (let dx = 0; dx < card.size.width; dx++) {
       for (let dy = 0; dy < card.size.height; dy++) {
         occupied.add(`${card.position.x + dx},${card.position.y + dy}`);
       }
     }
   }
+  return occupied;
+}
+
+// Check if a card of given size fits at a position without overlapping occupied cells
+function fitsAt(occupied: Set<string>, pos: Position, size: Size): boolean {
+  if (pos.x + size.width > GRID_COLS || pos.x < 0 || pos.y < 0) return false;
+  for (let dx = 0; dx < size.width; dx++) {
+    for (let dy = 0; dy < size.height; dy++) {
+      if (occupied.has(`${pos.x + dx},${pos.y + dy}`)) return false;
+    }
+  }
+  return true;
+}
+
+// Find the first available grid position that fits a card of the given size
+function findNextAvailablePosition(cards: BentoCard[], size: Size): Position {
+  const occupied = buildOccupied(cards);
 
   for (let y = 0; y < 100; y++) {
     for (let x = 0; x <= GRID_COLS - size.width; x++) {
-      let fits = true;
-      for (let dx = 0; dx < size.width && fits; dx++) {
-        for (let dy = 0; dy < size.height && fits; dy++) {
-          if (occupied.has(`${x + dx},${y + dy}`)) fits = false;
-        }
-      }
-      if (fits) return { x, y };
+      if (fitsAt(occupied, { x, y }, size)) return { x, y };
     }
   }
 
@@ -331,15 +343,24 @@ export const useBentoStore = create<BentoStore>()(
         if (!card) return state;
 
         // Clamp position so card stays within grid
-        let { x, y } = card.position;
-        if (x + size.width > GRID_COLS) {
-          x = Math.max(0, GRID_COLS - size.width);
+        let pos = { ...card.position };
+        if (pos.x + size.width > GRID_COLS) {
+          pos = { ...pos, x: Math.max(0, GRID_COLS - size.width) };
         }
-        const position = { x, y };
+
+        // Check if resized card overlaps others at current position
+        const occupied = buildOccupied(state.cards, [id]);
+        if (!fitsAt(occupied, pos, size)) {
+          // Find new position that fits
+          pos = findNextAvailablePosition(
+            state.cards.filter((c) => c.id !== id),
+            size
+          );
+        }
 
         return {
           cards: state.cards.map((c) =>
-            c.id === id ? { ...c, size, position } : c
+            c.id === id ? { ...c, size, position: pos } : c
           ),
         };
       });
@@ -397,16 +418,52 @@ export const useBentoStore = create<BentoStore>()(
     },
 
     reorderCards: (activeId, overId) => {
-      // Swap positions of the two cards
       set((state) => {
         const activeCard = state.cards.find((c) => c.id === activeId);
         const overCard = state.cards.find((c) => c.id === overId);
         if (!activeCard || !overCard) return state;
 
+        // Build occupancy grid excluding both swapped cards
+        const occupied = buildOccupied(state.cards, [activeId, overId]);
+
+        // Place active card at over card's position (clamp if needed)
+        let activeNewPos = { ...overCard.position };
+        if (activeNewPos.x + activeCard.size.width > GRID_COLS) {
+          activeNewPos = { ...activeNewPos, x: Math.max(0, GRID_COLS - activeCard.size.width) };
+        }
+        // If it doesn't fit (overlap with other cards), find next available
+        if (!fitsAt(occupied, activeNewPos, activeCard.size)) {
+          activeNewPos = findNextAvailablePosition(
+            state.cards.filter((c) => c.id !== activeId && c.id !== overId),
+            activeCard.size
+          );
+        }
+
+        // Mark active card's cells as occupied for the over card search
+        const occupiedWithActive = new Set(occupied);
+        for (let dx = 0; dx < activeCard.size.width; dx++) {
+          for (let dy = 0; dy < activeCard.size.height; dy++) {
+            occupiedWithActive.add(`${activeNewPos.x + dx},${activeNewPos.y + dy}`);
+          }
+        }
+
+        // Place over card at active's old position, or find nearest valid spot
+        let overNewPos = { ...activeCard.position };
+        if (overNewPos.x + overCard.size.width > GRID_COLS) {
+          overNewPos = { ...overNewPos, x: Math.max(0, GRID_COLS - overCard.size.width) };
+        }
+        if (!fitsAt(occupiedWithActive, overNewPos, overCard.size)) {
+          // Find first available position considering all placed cards
+          const placedCards = state.cards
+            .filter((c) => c.id !== activeId && c.id !== overId)
+            .concat([{ ...activeCard, position: activeNewPos }]);
+          overNewPos = findNextAvailablePosition(placedCards, overCard.size);
+        }
+
         return {
           cards: state.cards.map((c) => {
-            if (c.id === activeId) return { ...c, position: { ...overCard.position } };
-            if (c.id === overId) return { ...c, position: { ...activeCard.position } };
+            if (c.id === activeId) return { ...c, position: activeNewPos };
+            if (c.id === overId) return { ...c, position: overNewPos };
             return c;
           }),
         };

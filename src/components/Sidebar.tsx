@@ -259,7 +259,7 @@ export function Sidebar({ username }: SidebarProps) {
           data-placeholder="Your name"
           onBlur={(e) => updateProfile({ name: e.currentTarget.textContent || '' })}
         >
-          {profile.name}
+          {profile.name || null}
         </h1>
 
         {/* Title - editable */}
@@ -270,7 +270,7 @@ export function Sidebar({ username }: SidebarProps) {
           data-placeholder="Title | Pronouns"
           onBlur={(e) => updateProfile({ title: e.currentTarget.textContent || '' })}
         >
-          {profile.title}
+          {profile.title || null}
         </p>
 
         {/* Tags - editable */}
@@ -283,7 +283,7 @@ export function Sidebar({ username }: SidebarProps) {
               data-placeholder="Description"
               onBlur={(e) => updateTag(index, e.currentTarget.textContent || '')}
             >
-              {tag}
+              {tag || null}
             </li>
           ))}
         </ul>
@@ -299,7 +299,7 @@ export function Sidebar({ username }: SidebarProps) {
             onInput={handleBioInput}
             onBlur={handleBioBlur}
           >
-            {profile.bio}
+            {profile.bio || null}
           </p>
           <span className={getCharCountClass()}>
             {charCount}/{MAX_BIO_LENGTH} characters

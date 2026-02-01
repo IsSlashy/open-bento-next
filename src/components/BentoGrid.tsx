@@ -231,8 +231,10 @@ export function BentoGrid() {
           {activeCard ? (
             <DragOverlayCard
               card={activeCard}
-              width={draggedCardSize.width}
-              height={draggedCardSize.height}
+              width={Math.min(draggedCardSize.width, 400)}
+              height={draggedCardSize.width > 400
+                ? draggedCardSize.height * (400 / draggedCardSize.width)
+                : draggedCardSize.height}
             />
           ) : null}
         </DragOverlay>
