@@ -540,7 +540,7 @@ body {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   gap: 12px;
-  grid-auto-rows: minmax(48px, auto);
+  grid-auto-rows: auto;
   /* No auto-flow: cards are positioned explicitly via grid-column/grid-row */
   width: 100%;
   max-width: 100%;
