@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 
   // Reject oversized data-URLs server-side (videos stored as base64 crash the DB/SSR)
   const contentData = (result.data.content as { data?: { url?: string } })?.data;
-  if (contentData?.url && contentData.url.startsWith('data:') && contentData.url.length > 500_000) {
+  if (contentData?.url && contentData.url.startsWith('data:') && contentData.url.length > 2_500_000) {
     return NextResponse.json(
       { error: 'Media too large to store inline. Use a shorter video or compress the file.' },
       { status: 413 }

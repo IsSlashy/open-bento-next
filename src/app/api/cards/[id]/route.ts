@@ -59,7 +59,7 @@ export async function PUT(
 
   // Reject oversized data-URLs
   const contentData = (result.data.content as { data?: { url?: string } } | undefined)?.data;
-  if (contentData?.url && contentData.url.startsWith('data:') && contentData.url.length > 500_000) {
+  if (contentData?.url && contentData.url.startsWith('data:') && contentData.url.length > 2_500_000) {
     return NextResponse.json(
       { error: 'Media too large to store inline.' },
       { status: 413 }
