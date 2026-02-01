@@ -4,17 +4,16 @@ import { useCallback, useState, useRef, useEffect } from 'react';
 import {
   DndContext,
   DragEndEvent,
-  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   pointerWithin,
   closestCorners,
-  CollisionDetection,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
+import type { CollisionDetection } from '@dnd-kit/core';
 import {
   SortableContext,
   sortableKeyboardCoordinates,
@@ -74,18 +73,16 @@ export function BentoGrid() {
     }
   }, [gridCards]);
 
-  // Live reorder while dragging — gives immediate visual feedback
-  const handleDragOver = useCallback((event: DragOverEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
+
     if (over && active.id !== over.id) {
       reorderCards(active.id as string, over.id as string);
     }
-  }, [reorderCards]);
 
-  const handleDragEnd = useCallback(() => {
     setActiveCard(null);
     setDraggedCardSize({ width: 0, height: 0 });
-  }, []);
+  }, [reorderCards]);
 
   // File drop handler
   const handleFileDrop = useCallback(async (e: React.DragEvent) => {
@@ -204,7 +201,6 @@ export function BentoGrid() {
         sensors={sensors}
         collisionDetection={collisionDetection}
         onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={gridCards.map((c) => c.id)} strategy={rectSortingStrategy}>
