@@ -28,7 +28,7 @@ const sizeOptions: Array<{ label: string; size: Size; shapeClass: string }> = [
 ];
 
 // Card content renderer
-function CardContent({ card }: { card: BentoCardType }) {
+function CardContent({ card, isDragging }: { card: BentoCardType; isDragging?: boolean }) {
   switch (card.content.type) {
     case 'social':
       return <SocialCard content={card.content.data} style={card.style} />;
@@ -39,7 +39,7 @@ function CardContent({ card }: { card: BentoCardType }) {
     case 'text':
       return <TextCard id={card.id} content={card.content.data} isEditing={false} />;
     case 'media':
-      return <MediaCard cardId={card.id} content={card.content.data} />;
+      return <MediaCard cardId={card.id} content={card.content.data} isDragging={isDragging} />;
     case 'map':
       return <MapCard content={card.content.data} />;
     case 'title':
@@ -146,7 +146,7 @@ export function BentoCard({ card, isDragging }: BentoCardProps) {
 
       {/* Content - wrapper avec border-radius pour clipper le contenu */}
       <div className="card-content-wrapper">
-        <CardContent card={card} />
+        <CardContent card={card} isDragging={isDragging} />
       </div>
 
       {/* Size Selector - OUTSIDE bottom center (not for title cards) */}

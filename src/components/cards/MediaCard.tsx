@@ -10,9 +10,10 @@ import { X } from 'lucide-react';
 interface MediaCardProps {
   cardId: string;
   content: MediaContent;
+  isDragging?: boolean;
 }
 
-export function MediaCard({ cardId, content }: MediaCardProps) {
+export function MediaCard({ cardId, content, isDragging }: MediaCardProps) {
   const { updateCardContent } = useBentoStore();
   const [isCropping, setIsCropping] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -99,11 +100,24 @@ export function MediaCard({ cardId, content }: MediaCardProps) {
 
   // Video — no crop, click to open lightbox with sound
   const [videoOpen, setVideoOpen] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Pause video during drag to avoid stutter
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (isDragging) {
+      v.pause();
+    } else {
+      v.play().catch(() => {});
+    }
+  }, [isDragging]);
 
   if (isVideo) {
     return (
       <div className="media-card" ref={containerRef}>
         <video
+          ref={videoRef}
           src={content.url}
           className="w-full h-full object-cover cursor-pointer"
           autoPlay
