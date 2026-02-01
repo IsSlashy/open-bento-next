@@ -22,7 +22,7 @@ export function EditorClient({ profile, cards, username }: EditorClientProps) {
   return (
     <StoreHydrator profile={profile} cards={cards}>
       <div className="app">
-        <Sidebar />
+        <Sidebar username={username} />
         <main className="main-content">
           <BentoGrid />
         </main>

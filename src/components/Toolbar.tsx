@@ -244,6 +244,13 @@ export function Toolbar({ username }: ToolbarProps) {
             <span>Share my Bento</span>
           </button>
 
+          {/* Username URL indicator */}
+          {username && (
+            <button className="toolbar-url" onClick={handleCopy} title="Click to copy your public URL">
+              /{username}
+            </button>
+          )}
+
           {/* Toolbar Icons */}
           <div className="toolbar-icons">
             {/* Add Link */}
