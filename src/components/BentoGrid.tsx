@@ -132,15 +132,13 @@ export function BentoGrid() {
 
         if (!isVideo && !isImage) continue;
 
-        // Videos are too large to store as data-URLs and there is no
-        // cloud storage configured — reject them with a user-visible alert.
-        if (isVideo) {
-          alert('Video uploads are not supported yet. Please upload images or GIFs instead.');
-          continue;
-        }
-
-        // GIFs — read directly (no compression)
-        if (isGif) {
+        // Videos & GIFs — read directly (no compression), with size limit
+        if (isVideo || isGif) {
+          const MAX_VIDEO_SIZE = 4 * 1024 * 1024; // 4 MB
+          if (isVideo && file.size > MAX_VIDEO_SIZE) {
+            alert('Video trop volumineuse (max 4 Mo). Utilisez une vidéo plus courte ou compressée.');
+            continue;
+          }
           const reader = new FileReader();
           reader.onload = () => {
             const dataUrl = reader.result as string;
@@ -151,7 +149,7 @@ export function BentoGrid() {
               content: {
                 type: 'media',
                 data: {
-                  type: 'gif',
+                  type: isVideo ? 'video' : 'gif',
                   url: dataUrl,
                   alt: file.name,
                 },

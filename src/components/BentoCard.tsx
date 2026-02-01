@@ -118,6 +118,7 @@ export function BentoCard({ card, isDragging }: BentoCardProps) {
   };
 
   const isMedia = card.content.type === 'media';
+  const isMediaVideo = isMedia && (card.content.data as { type?: string })?.type === 'video';
 
   return (
     <div
@@ -164,7 +165,7 @@ export function BentoCard({ card, isDragging }: BentoCardProps) {
               <span className={cn('shape', shapeClass)} />
             </button>
           ))}
-          {isMedia && (
+          {isMedia && !isMediaVideo && (
             <>
               <span className="size-selector-divider" />
               <button

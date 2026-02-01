@@ -5,7 +5,7 @@ import { BentoCard, CardContent, CardStyle, CardType } from './types';
 // Anything larger was likely a video/file stored inline by mistake and will
 // crash serialisation or the browser.  Strip the URL so the card renders as
 // a broken placeholder the user can delete.
-const MAX_DATA_URL_LENGTH = 500_000;
+const MAX_DATA_URL_LENGTH = 6_000_000; // ~4.5 MB binary (base64 overhead)
 
 // Convert Prisma Card to client BentoCard
 // Migration from 4-col to 8-col is handled by the store's hydrate function.
@@ -14,12 +14,11 @@ export function dbCardToClient(card: PrismaCard): BentoCard {
 
   // Guard against oversized inline data-URLs (e.g. videos stored as base64)
   if (content?.type === 'media') {
-    const data = (content as { type: 'media'; data: Record<string, unknown> }).data;
-    const url = data?.url as string | undefined;
-    if (url && url.startsWith('data:') && url.length > MAX_DATA_URL_LENGTH) {
+    const data = (content as unknown as { type: 'media'; data: { url?: string; type?: string } }).data;
+    if (data?.url && data.url.startsWith('data:') && data.url.length > MAX_DATA_URL_LENGTH) {
       content = {
         ...content,
-        data: { ...data, url: '', type: data.type },
+        data: { ...data, url: '' },
       } as CardContent;
     }
   }
