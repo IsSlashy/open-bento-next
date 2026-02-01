@@ -122,13 +122,23 @@ const defaultCards: BentoCard[] = [
 const GRID_COLS = 8;
 
 // Migrate cards from old 4-col grid to 8-col grid by doubling positions and sizes.
-// Idempotent: skips if cards already appear to use the 8-col layout.
+// Only triggers when cards clearly come from the old 4-col format.
 function migrateToEightCol(cards: BentoCard[]): BentoCard[] {
   if (cards.length === 0) return cards;
 
-  // If any card's right edge exceeds 4, data is already in 8-col format
-  const maxRight = Math.max(...cards.map((c) => c.position.x + c.size.width));
-  if (maxRight > 4) return cards;
+  // If any card extends beyond 4 columns, already 8-col
+  const isAlready8Col = cards.some((c) =>
+    c.position.x + c.size.width > 4 ||
+    c.size.width > 4 ||
+    c.size.height > 4 ||
+    c.position.x >= 4
+  );
+  if (isAlready8Col) return cards;
+
+  // If all widths are even, this is likely already 8-col (doubled values).
+  // Only migrate if at least one card has an odd width (4-col signature).
+  const hasOddDimension = cards.some((c) => c.size.width % 2 !== 0);
+  if (!hasOddDimension) return cards;
 
   return cards.map((c) => ({
     ...c,

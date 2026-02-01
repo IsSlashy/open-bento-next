@@ -25,7 +25,7 @@ export const profileUpdateSchema = z.object({
   title: z.string().max(100).optional(),
   bio: z.string().max(280).optional(),
   avatarUrl: z.string().url().optional().nullable(),
-  tags: z.array(z.string().max(30)).max(5).optional(),
+  tags: z.array(z.string().max(500)).max(5).optional(),
   isPublic: z.boolean().optional(),
   theme: z.enum(['light', 'dark']).optional(),
 });
