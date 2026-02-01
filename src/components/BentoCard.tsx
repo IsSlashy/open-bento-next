@@ -12,7 +12,7 @@ import { MediaCard } from './cards/MediaCard';
 import { MapCard } from './cards/MapCard';
 import { TitleCard } from './cards/TitleCard';
 import { cn } from '@/lib/utils';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Move } from 'lucide-react';
 
 interface BentoCardProps {
   card: BentoCardType;
@@ -94,6 +94,13 @@ export function BentoCard({ card, isDragging }: BentoCardProps) {
     removeCard(card.id);
   };
 
+  const handleReposition = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    document.dispatchEvent(new CustomEvent('reposition-media', { detail: { cardId: card.id } }));
+  };
+
+  const isMedia = card.content.type === 'media';
+
   return (
     <div
       ref={setNodeRef}
@@ -138,6 +145,18 @@ export function BentoCard({ card, isDragging }: BentoCardProps) {
               <span className={cn('shape', shapeClass)} />
             </button>
           ))}
+          {isMedia && (
+            <>
+              <span className="size-selector-divider" />
+              <button
+                className="size-btn reposition-btn"
+                onClick={handleReposition}
+                title="Repositionner"
+              >
+                <Move className="w-3 h-3" style={{ color: 'rgba(255,255,255,0.7)' }} />
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>

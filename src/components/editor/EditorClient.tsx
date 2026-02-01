@@ -16,13 +16,14 @@ interface EditorClientProps {
   };
   cards: BentoCard[];
   username: string;
+  profileId: string;
 }
 
-export function EditorClient({ profile, cards, username }: EditorClientProps) {
+export function EditorClient({ profile, cards, username, profileId }: EditorClientProps) {
   return (
     <StoreHydrator profile={profile} cards={cards}>
       <div className="app">
-        <Sidebar username={username} />
+        <Sidebar username={username} profileId={profileId} />
         <main className="main-content">
           <BentoGrid />
         </main>

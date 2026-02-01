@@ -47,6 +47,7 @@ export default async function EditorPage() {
       profile={clientProfile}
       cards={clientCards}
       username={session.user.username}
+      profileId={profile.id}
     />
   );
 }

@@ -1,8 +1,10 @@
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import { Metadata } from 'next';
 import { prisma } from '@/lib/db';
 import { dbCardToClient, dbProfileToClient } from '@/lib/converters';
 import { PublicProfile } from '@/components/public/PublicProfile';
+import { createHash } from 'crypto';
 
 interface Props {
   params: { username: string };
@@ -66,6 +68,40 @@ export default async function ProfilePage({ params }: Props) {
 
   const profile = dbProfileToClient(user.profile);
   const cards = user.profile.cards.map(dbCardToClient);
+
+  // Track page view server-side (fire-and-forget)
+  try {
+    const headersList = await headers();
+    const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || headersList.get('x-real-ip')
+      || 'unknown';
+    const ipHash = createHash('sha256').update(ip).digest('hex');
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+    const existing = await prisma.pageView.findFirst({
+      where: {
+        profileId: user.profile.id,
+        ipHash,
+        viewedAt: {
+          gte: todayStart,
+          lt: new Date(todayStart.getTime() + 86400000),
+        },
+      },
+    });
+
+    if (!existing) {
+      await prisma.pageView.create({
+        data: {
+          profileId: user.profile.id,
+          ipHash,
+          viewedAt: new Date(),
+        },
+      });
+    }
+  } catch (err) {
+    console.error('View tracking error:', err);
+  }
 
   return <PublicProfile profile={profile} cards={cards} username={params.username} />;
 }

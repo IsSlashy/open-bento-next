@@ -32,7 +32,8 @@ const collisionDetection: CollisionDetection = (args) => {
 };
 
 export function BentoGrid() {
-  const { cards, reorderCards, addCard } = useBentoStore();
+  const { cards, reorderCards, moveCardToPosition, addCard } = useBentoStore();
+  const gridRef = useRef<HTMLDivElement>(null);
   const [activeCard, setActiveCard] = useState<CardType | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   // Capturer la taille exacte de la carte au début du drag
@@ -73,15 +74,36 @@ export function BentoGrid() {
   }, [gridCards]);
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
+    const { active, delta } = event;
 
-    if (over && active.id !== over.id) {
-      reorderCards(active.id as string, over.id as string);
+    if (delta && (delta.x !== 0 || delta.y !== 0) && gridRef.current) {
+      const card = gridCards.find((c) => c.id === active.id);
+      if (card) {
+        // Calculate grid cell size from the grid element
+        const gridEl = gridRef.current;
+        const gridRect = gridEl.getBoundingClientRect();
+        const gridStyles = window.getComputedStyle(gridEl);
+        const gap = parseFloat(gridStyles.gap || '12');
+        const padding = parseFloat(gridStyles.paddingLeft || '16');
+        const gridWidth = gridRect.width - padding * 2;
+        const colWidth = (gridWidth - gap * 7) / 8; // 8 columns, 7 gaps
+        const rowHeight = colWidth; // rows ~= col width for square grid cells
+
+        // Convert pixel delta to grid cell delta
+        const deltaCol = Math.round(delta.x / (colWidth + gap));
+        const deltaRow = Math.round(delta.y / (rowHeight + gap));
+
+        if (deltaCol !== 0 || deltaRow !== 0) {
+          const newX = card.position.x + deltaCol;
+          const newY = card.position.y + deltaRow;
+          moveCardToPosition(card.id, { x: newX, y: newY });
+        }
+      }
     }
 
     setActiveCard(null);
     setDraggedCardSize({ width: 0, height: 0 });
-  }, [reorderCards]);
+  }, [gridCards, moveCardToPosition]);
 
   // File drop handler
   const handleFileDrop = useCallback(async (e: React.DragEvent) => {
@@ -204,7 +226,7 @@ export function BentoGrid() {
       >
         <SortableContext items={gridCards.map((c) => c.id)}>
           {/* Single unified grid - titles are widgets like any other card */}
-          <div className="bento-grid">
+          <div className="bento-grid" ref={gridRef}>
             {gridCards.map((card) => (
               <BentoCard key={card.id} card={card} isDragging={activeCard?.id === card.id} />
             ))}

@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MediaContent } from '@/lib/types';
 import { useBentoStore } from '@/lib/store';
 import { GifPositioner } from '../GifPositioner';
-import { Move } from 'lucide-react';
 
 interface MediaCardProps {
   cardId: string;
@@ -14,6 +13,18 @@ interface MediaCardProps {
 export function MediaCard({ cardId, content }: MediaCardProps) {
   const { updateCardContent } = useBentoStore();
   const [showPositioner, setShowPositioner] = useState(false);
+
+  // Listen for reposition event from BentoCard's size-selector button
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.cardId === cardId) {
+        setShowPositioner(true);
+      }
+    };
+    document.addEventListener('reposition-media', handler);
+    return () => document.removeEventListener('reposition-media', handler);
+  }, [cardId]);
 
   // Détecter si c'est un GIF (par type ou URL)
   const isGif = content.type === 'gif' ||
@@ -45,11 +56,6 @@ export function MediaCard({ cardId, content }: MediaCardProps) {
     setShowPositioner(false);
   };
 
-  const handlePositionClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowPositioner(true);
-  };
-
   // Vidéo - pas de positionnement pour les vidéos
   if (isVideo) {
     return (
@@ -67,7 +73,7 @@ export function MediaCard({ cardId, content }: MediaCardProps) {
     );
   }
 
-  // GIF ou Image - avec bouton de positionnement
+  // GIF ou Image
   return (
     <div className="media-card">
       <img
@@ -78,15 +84,6 @@ export function MediaCard({ cardId, content }: MediaCardProps) {
         loading={isGif ? 'eager' : 'lazy'}
         decoding="async"
       />
-
-      {/* Bouton de repositionnement */}
-      <button
-        className="media-position-btn"
-        onClick={handlePositionClick}
-        title="Repositionner"
-      >
-        <Move className="w-4 h-4" />
-      </button>
 
       {/* Positionner Modal */}
       {showPositioner && (

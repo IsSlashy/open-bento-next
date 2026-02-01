@@ -34,6 +34,7 @@ interface BentoStore {
   updateCardStyle: (id: string, style: CardStyle) => void;
   duplicateCard: (id: string) => void;
   reorderCards: (activeId: string, overId: string) => void;
+  moveCardToPosition: (id: string, position: Position) => void;
 
   // Selection
   selectCard: (id: string | null) => void;
@@ -55,7 +56,7 @@ const defaultProfile: Profile = {
   avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=default',
   name: '',
   title: '',
-  tags: ['', '', ''],
+  tags: [''],
   bio: '',
 };
 
@@ -506,6 +507,71 @@ export const useBentoStore = create<BentoStore>()(
           }));
         }
 
+        Promise.all(updates).then(() => set({ lastSaved: new Date() }));
+      }, 500);
+    },
+
+    moveCardToPosition: (id, targetPos) => {
+      set((state) => {
+        const card = state.cards.find((c) => c.id === id);
+        if (!card) return state;
+
+        // Clamp target so card stays within grid
+        const clampedPos = {
+          x: Math.max(0, Math.min(targetPos.x, GRID_COLS - card.size.width)),
+          y: Math.max(0, targetPos.y),
+        };
+
+        // Build occupancy excluding the moved card
+        const otherCards = state.cards.filter((c) => c.id !== id);
+        const occupied = buildOccupied(otherCards);
+
+        // Check if target position is free
+        if (fitsAt(occupied, clampedPos, card.size)) {
+          // Direct placement
+          return {
+            cards: state.cards.map((c) =>
+              c.id === id ? { ...c, position: clampedPos } : c
+            ),
+          };
+        }
+
+        // Target is occupied — find overlapping cards and push them down
+        const movedCard = { ...card, position: clampedPos };
+        const newCards: BentoCard[] = [movedCard];
+
+        // Sort remaining cards by position (top-to-bottom, left-to-right)
+        const remaining = otherCards.sort((a, b) =>
+          a.position.y !== b.position.y ? a.position.y - b.position.y : a.position.x - b.position.x
+        );
+
+        for (const other of remaining) {
+          const currentOccupied = buildOccupied(newCards);
+          if (fitsAt(currentOccupied, other.position, other.size)) {
+            // Fits at current position
+            newCards.push(other);
+          } else {
+            // Push down: find next available position
+            const newPos = findNextAvailablePosition(newCards, other.size);
+            newCards.push({ ...other, position: newPos });
+          }
+        }
+
+        return { cards: newCards };
+      });
+
+      // Sync all card positions with API
+      debouncedSave(() => {
+        const cards = get().cards;
+        const updates: Promise<unknown>[] = [];
+        for (const card of cards) {
+          if (!card.id.startsWith('temp-')) {
+            updates.push(apiCall(`/api/cards/${card.id}`, 'PUT', {
+              positionX: card.position.x,
+              positionY: card.position.y,
+            }));
+          }
+        }
         Promise.all(updates).then(() => set({ lastSaved: new Date() }));
       }, 500);
     },

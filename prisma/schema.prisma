@@ -73,8 +73,9 @@ model Profile {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cards Card[]
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cards     Card[]
+  pageViews PageView[]
 }
 
 enum CardType {
@@ -107,4 +108,17 @@ model Card {
 
   @@index([profileId])
   @@index([profileId, sortOrder])
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  profileId String
+  ipHash    String
+  viewedAt  DateTime @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([profileId, viewedAt])
+  @@index([profileId, ipHash, viewedAt])
 }

@@ -21,9 +21,10 @@ function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: numbe
 
 interface SidebarProps {
   username?: string;
+  profileId?: string;
 }
 
-export function Sidebar({ username }: SidebarProps) {
+export function Sidebar({ username, profileId }: SidebarProps) {
   const { profile, updateProfile } = useBentoStore();
   const { resolvedTheme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -42,9 +43,23 @@ export function Sidebar({ username }: SidebarProps) {
   // Settings menu state
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
 
+  // View counts
+  const [viewCount, setViewCount] = useState<{ total: number; yesterday: number; today: number } | null>(null);
+
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Fetch view count
+  useEffect(() => {
+    if (!profileId) return;
+    fetch(`/api/views?profileId=${profileId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.total !== undefined) setViewCount(data);
+      })
+      .catch(() => {});
+  }, [profileId]);
 
   // Close settings menu when clicking outside
   useEffect(() => {
@@ -165,10 +180,8 @@ export function Sidebar({ username }: SidebarProps) {
     updateProfile({ bio: text.substring(0, MAX_BIO_LENGTH) });
   };
 
-  const updateTag = (index: number, value: string) => {
-    const newTags = [...profile.tags];
-    newTags[index] = value;
-    updateProfile({ tags: newTags });
+  const updateDescription = (value: string) => {
+    updateProfile({ tags: [value] });
   };
 
   const getCharCountClass = () => {
@@ -273,20 +286,16 @@ export function Sidebar({ username }: SidebarProps) {
           {profile.title || null}
         </p>
 
-        {/* Tags - editable */}
-        <ul className="profile-tags">
-          {profile.tags.map((tag, index) => (
-            <li
-              key={index}
-              contentEditable
-              suppressContentEditableWarning
-              data-placeholder="Description"
-              onBlur={(e) => updateTag(index, e.currentTarget.textContent || '')}
-            >
-              {tag || null}
-            </li>
-          ))}
-        </ul>
+        {/* Description - single editable field */}
+        <p
+          className="profile-description"
+          contentEditable
+          suppressContentEditableWarning
+          data-placeholder="Description"
+          onBlur={(e) => updateDescription(e.currentTarget.innerText || '')}
+        >
+          {profile.tags[0] || null}
+        </p>
 
         {/* Bio - editable with character limit */}
         <div className="bio-wrapper">
@@ -427,7 +436,11 @@ export function Sidebar({ username }: SidebarProps) {
         </div>
 
         <div className="footer-divider"></div>
-        <span className="footer-views">2 Views Yesterday</span>
+        <span className="footer-views">
+          {viewCount
+            ? `${viewCount.total} View${viewCount.total !== 1 ? 's' : ''}`
+            : '0 Views'}
+        </span>
       </footer>
     </aside>
   );

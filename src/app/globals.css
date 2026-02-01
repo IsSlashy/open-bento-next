@@ -176,25 +176,15 @@ body {
   text-underline-offset: 3px;
 }
 
-/* Tags */
-.profile-tags {
-  list-style: none;
-  margin-bottom: 20px;
-}
-
-.profile-tags li {
+/* Description */
+.profile-description {
   font-size: 14px;
   color: var(--text-secondary);
-  margin-bottom: 4px;
+  margin-bottom: 20px;
   min-height: 20px;
   outline: none;
-}
-
-.profile-tags .wavy {
-  text-decoration: underline;
-  text-decoration-style: wavy;
-  text-decoration-color: #ef4444;
-  text-underline-offset: 3px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* Bio */
@@ -390,8 +380,8 @@ body {
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
-  background: #1a1a1a;
-  color: white;
+  background: var(--text-primary);
+  color: var(--card-bg);
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 12px;
@@ -412,13 +402,18 @@ body {
   position: absolute;
   bottom: calc(100% + 10px);
   left: 0;
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  border: 1px solid var(--border-color);
   padding: 8px 0;
   min-width: 220px;
   z-index: 1000;
   animation: settingsMenuIn 0.2s ease;
+}
+
+.dark .settings-menu {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
 @keyframes settingsMenuIn {
@@ -447,7 +442,7 @@ body {
 }
 
 .settings-item:hover {
-  background: #f9fafb;
+  background: var(--bg-secondary);
 }
 
 /* Items with icon (Export, Logout) */
@@ -469,7 +464,7 @@ body {
 
 .settings-item-value {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .settings-item-danger {
@@ -486,9 +481,17 @@ body {
   margin: 8px 0;
 }
 
+.dark .footer-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .footer-btn.active {
   background: rgba(0, 0, 0, 0.08);
   color: var(--text-primary);
+}
+
+.dark .footer-btn.active {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 /* ==================== MAIN CONTENT (RIGHT) ==================== */
@@ -756,6 +759,19 @@ body {
   background: white;
 }
 
+.size-selector-divider {
+  width: 1px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 2px;
+}
+
+.size-btn.reposition-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .shape {
   display: block;
   background: rgba(255, 255, 255, 0.4);
@@ -804,7 +820,7 @@ body {
 .profile-name:empty::before,
 .profile-title:empty::before,
 .profile-bio:empty::before,
-.profile-tags li:empty::before {
+.profile-description:empty::before {
   content: attr(data-placeholder);
   color: #9ca3af;
   pointer-events: none;
@@ -1135,46 +1151,15 @@ body {
   transform: translateZ(0);
 }
 
-/* Bouton de positionnement media */
-.media-position-btn {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.95);
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.2s ease;
-  z-index: 10;
-}
-
-.media-card:hover .media-position-btn {
-  opacity: 1;
-  visibility: visible;
-}
-
-.media-position-btn:hover {
-  background: white;
-  transform: scale(1.1);
-}
-
-.media-position-btn svg {
-  color: #374151;
-}
+/* (Reposition button now lives in size-selector bar) */
 
 /* ==================== GIF POSITIONER ==================== */
 .gif-positioner-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1188,13 +1173,18 @@ body {
 }
 
 .gif-positioner-modal {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  max-width: 450px;
+  background: var(--card-bg);
+  border-radius: 24px;
+  padding: 20px;
+  max-width: 360px;
   width: 90%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--border-color);
   animation: slideUp 0.3s ease;
+}
+
+.dark .gif-positioner-modal {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 @keyframes slideUp {
@@ -1212,18 +1202,18 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .gif-positioner-header h3 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .gif-positioner-close {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 8px;
   background: transparent;
   border: none;
@@ -1231,28 +1221,28 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
+  color: var(--text-muted);
   transition: all 0.15s ease;
 }
 
 .gif-positioner-close:hover {
-  background: #f3f4f6;
-  color: #1a1a1a;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .gif-positioner-preview-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .gif-positioner-preview {
-  width: 200px;
-  height: 200px;
+  width: 160px;
+  height: 160px;
   border-radius: 16px;
   overflow: hidden;
-  border: 3px solid #e5e7eb;
-  background: #f9fafb;
+  border: 2px solid var(--border-color);
+  background: var(--bg-secondary);
 }
 
 .gif-positioner-preview img {
@@ -1265,36 +1255,36 @@ body {
 .gif-positioner-controls {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 14px;
+  margin-bottom: 20px;
 }
 
 .gif-positioner-control {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .gif-positioner-control label {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-secondary);
 }
 
 .gif-positioner-value {
-  font-size: 13px;
-  color: #6b7280;
+  font-size: 12px;
+  color: var(--text-muted);
   font-weight: 400;
 }
 
 .gif-positioner-control input[type="range"] {
   width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: #e5e7eb;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bg-secondary);
   -webkit-appearance: none;
   appearance: none;
   cursor: pointer;
@@ -1303,23 +1293,23 @@ body {
 .gif-positioner-control input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: #10b981;
   cursor: pointer;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  border: 2px solid var(--card-bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .gif-positioner-control input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: #10b981;
   cursor: pointer;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  border: 2px solid var(--card-bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .gif-positioner-actions {
@@ -1330,16 +1320,16 @@ body {
 
 .gif-positioner-actions-right {
   display: flex;
-  gap: 12px;
+  gap: 8px;
 }
 
 .gif-positioner-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -1347,22 +1337,22 @@ body {
 }
 
 .gif-positioner-btn.reset {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
 }
 
 .gif-positioner-btn.reset:hover {
-  background: #e5e7eb;
+  background: var(--border-color);
 }
 
 .gif-positioner-btn.cancel {
   background: transparent;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .gif-positioner-btn.cancel:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
 }
 
 .gif-positioner-btn.apply {

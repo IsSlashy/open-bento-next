@@ -73,11 +73,9 @@ export function PublicProfile({ profile, cards, username }: PublicProfileProps) 
               <p className="profile-title">{profile.title}</p>
             )}
 
-            <ul className="profile-tags">
-              {profile.tags.filter(Boolean).map((tag, i) => (
-                <li key={i}>{tag}</li>
-              ))}
-            </ul>
+            {profile.tags[0] && (
+              <p className="profile-description">{profile.tags[0]}</p>
+            )}
 
             {profile.bio && (
               <div className="bio-wrapper">
