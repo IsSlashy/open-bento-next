@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { MediaContent, CropArea } from '@/lib/types';
 import { useBentoStore } from '@/lib/store';
 import { InlineCropTool } from '../InlineCropTool';
+import { X } from 'lucide-react';
 
 interface MediaCardProps {
   cardId: string;
@@ -95,19 +97,25 @@ export function MediaCard({ cardId, content }: MediaCardProps) {
     );
   }
 
-  // Video — no crop support
+  // Video — no crop, click to open lightbox with sound
+  const [videoOpen, setVideoOpen] = useState(false);
+
   if (isVideo) {
     return (
       <div className="media-card" ref={containerRef}>
         <video
           src={content.url}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover cursor-pointer"
           autoPlay
           muted
           loop
           playsInline
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            setVideoOpen(true);
+          }}
         />
+        {videoOpen && <VideoLightbox url={content.url} onClose={() => setVideoOpen(false)} />}
       </div>
     );
   }
@@ -198,5 +206,45 @@ export function MediaCard({ cardId, content }: MediaCardProps) {
         />
       )}
     </div>
+  );
+}
+
+// --- Video lightbox (portal) ---
+function VideoLightbox({ url, onClose }: { url: string; onClose: () => void }) {
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handler);
+      document.body.style.overflow = '';
+    };
+  }, [onClose]);
+
+  return createPortal(
+    <div
+      ref={overlayRef}
+      className="video-lightbox-overlay"
+      onClick={(e) => {
+        if (e.target === overlayRef.current) onClose();
+      }}
+    >
+      <button className="video-lightbox-close" onClick={onClose} aria-label="Close">
+        <X className="w-5 h-5" />
+      </button>
+      <video
+        src={url}
+        className="video-lightbox-player"
+        autoPlay
+        loop
+        playsInline
+        controls
+      />
+    </div>,
+    document.body,
   );
 }

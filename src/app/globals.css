@@ -1165,7 +1165,46 @@ body {
   transform: translateZ(0);
 }
 
-/* (Reposition button now lives in size-selector bar) */
+/* ==================== VIDEO LIGHTBOX ==================== */
+.video-lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.video-lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.video-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.video-lightbox-player {
+  max-width: 90vw;
+  max-height: 85vh;
+  border-radius: 12px;
+  outline: none;
+}
 
 /* ==================== INLINE CROP TOOL ==================== */
 .inline-crop-container {
