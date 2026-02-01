@@ -40,6 +40,8 @@ export function BentoGrid() {
   const [draggedCardSize, setDraggedCardSize] = useState({ width: 0, height: 0 });
   // Drag counter to handle nested elements
   const dragCounterRef = useRef(0);
+  // Track internal dnd-kit drag to ignore native file drop events
+  const isDraggingInternalRef = useRef(false);
 
   // Filter out profile cards - profile is now in sidebar
   const gridCards = cards.filter((c) => c.type !== 'profile');
@@ -57,6 +59,7 @@ export function BentoGrid() {
   );
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
+    isDraggingInternalRef.current = true;
     const card = gridCards.find((c) => c.id === event.active.id);
     if (card) {
       setActiveCard(card);
@@ -103,9 +106,10 @@ export function BentoGrid() {
 
     setActiveCard(null);
     setDraggedCardSize({ width: 0, height: 0 });
+    isDraggingInternalRef.current = false;
   }, [gridCards, moveCardToPosition]);
 
-  // File drop handler
+  // File drop handler — only for external files, not internal card drags
   const handleFileDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -113,6 +117,9 @@ export function BentoGrid() {
     // Reset counter and hide overlay
     dragCounterRef.current = 0;
     setIsDragOver(false);
+
+    // Ignore if this is an internal dnd-kit drag
+    if (isDraggingInternalRef.current) return;
 
     const files = Array.from(e.dataTransfer.files);
     if (files.length === 0) return;
@@ -171,10 +178,12 @@ export function BentoGrid() {
     }
   }, [addCard]);
 
-  // Drag enter - increment counter
+  // Drag enter - increment counter (only for external files)
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (isDraggingInternalRef.current) return;
 
     dragCounterRef.current++;
 
@@ -183,16 +192,19 @@ export function BentoGrid() {
     }
   }, []);
 
-  // Drag over - prevent default to allow file drop
+  // Drag over - prevent default to allow file drop (only for external files)
   const handleFileDragOver = useCallback((e: React.DragEvent) => {
+    if (isDraggingInternalRef.current) return;
     e.preventDefault();
     e.stopPropagation();
   }, []);
 
-  // Drag leave - decrement counter
+  // Drag leave - decrement counter (only for external files)
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (isDraggingInternalRef.current) return;
 
     dragCounterRef.current--;
 
