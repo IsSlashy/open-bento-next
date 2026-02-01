@@ -29,7 +29,8 @@ export async function GET(
     return NextResponse.json({ error: 'Card not found' }, { status: 404 });
   }
 
-  return NextResponse.json(card);
+  const { profileId: _pid, profile: _profile, ...safeCard } = card;
+  return NextResponse.json(safeCard);
 }
 
 export async function PUT(
@@ -71,7 +72,8 @@ export async function PUT(
     data: updateData,
   });
 
-  return NextResponse.json(updated);
+  const { profileId: _pid2, ...safeUpdated } = updated;
+  return NextResponse.json(safeUpdated);
 }
 
 export async function DELETE(

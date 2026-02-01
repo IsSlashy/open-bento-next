@@ -22,7 +22,7 @@ export async function GET() {
     orderBy: { sortOrder: 'asc' },
   });
 
-  return NextResponse.json(cards);
+  return NextResponse.json(cards.map(({ profileId: _pid, ...card }) => card));
 }
 
 export async function POST(req: Request) {
@@ -58,5 +58,6 @@ export async function POST(req: Request) {
     },
   });
 
-  return NextResponse.json(card, { status: 201 });
+  const { profileId: _pid, ...safeCard } = card;
+  return NextResponse.json(safeCard, { status: 201 });
 }

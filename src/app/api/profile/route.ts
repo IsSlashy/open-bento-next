@@ -17,7 +17,16 @@ export async function GET() {
     return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
   }
 
-  return NextResponse.json(profile);
+  return NextResponse.json({
+    id: profile.id,
+    displayName: profile.displayName,
+    title: profile.title,
+    bio: profile.bio,
+    avatarUrl: profile.avatarUrl,
+    tags: profile.tags,
+    theme: profile.theme,
+    isPublic: profile.isPublic,
+  });
 }
 
 export async function PUT(req: Request) {
@@ -41,5 +50,14 @@ export async function PUT(req: Request) {
     data: result.data,
   });
 
-  return NextResponse.json(profile);
+  return NextResponse.json({
+    id: profile.id,
+    displayName: profile.displayName,
+    title: profile.title,
+    bio: profile.bio,
+    avatarUrl: profile.avatarUrl,
+    tags: profile.tags,
+    theme: profile.theme,
+    isPublic: profile.isPublic,
+  });
 }

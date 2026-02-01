@@ -53,12 +53,23 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET — get view count for a profile
+// GET — get view count for a profile (authenticated, owner only)
 export async function GET(req: NextRequest) {
   try {
     const profileId = req.nextUrl.searchParams.get('profileId');
     if (!profileId) {
       return NextResponse.json({ error: 'profileId required' }, { status: 400 });
+    }
+
+    // Verify the caller owns this profile
+    const { auth } = await import('@/lib/auth');
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const profile = await prisma.profile.findUnique({ where: { id: profileId }, select: { userId: true } });
+    if (!profile || profile.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const total = await prisma.pageView.count({
