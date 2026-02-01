@@ -612,6 +612,15 @@ body {
   background: transparent;
 }
 
+/* Public card — read-only, no edit UI */
+.bento-card.public-card {
+  cursor: default;
+}
+
+.bento-card.public-card:hover {
+  box-shadow: none;
+}
+
 .bento-card.title-widget-card:hover {
   box-shadow: none;
 }

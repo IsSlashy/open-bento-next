@@ -17,7 +17,6 @@ import type { CollisionDetection } from '@dnd-kit/core';
 import {
   SortableContext,
   sortableKeyboardCoordinates,
-  rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useBentoStore } from '@/lib/store';
 import { BentoCard, DragOverlayCard } from './BentoCard';
@@ -203,7 +202,7 @@ export function BentoGrid() {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <SortableContext items={gridCards.map((c) => c.id)} strategy={rectSortingStrategy}>
+        <SortableContext items={gridCards.map((c) => c.id)}>
           {/* Single unified grid - titles are widgets like any other card */}
           <div className="bento-grid">
             {gridCards.map((card) => (

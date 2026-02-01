@@ -30,15 +30,11 @@ function PublicCardContent({ card }: { card: BentoCardType }) {
       return <LinkCard content={card.content.data} style={card.style} />;
     case 'text':
       return (
-        <div className="flex flex-col h-full p-5 bg-white dark:bg-zinc-800">
+        <div className="text-card">
           {card.content.data.title && (
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
-              {card.content.data.title}
-            </h3>
+            <h3 className="text-title">{card.content.data.title}</h3>
           )}
-          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed flex-1">
-            {card.content.data.body}
-          </p>
+          <p className="text-body">{card.content.data.body}</p>
         </div>
       );
     case 'media':
@@ -63,68 +59,69 @@ export function PublicProfile({ profile, cards, username }: PublicProfileProps) 
 
   return (
     <div className="min-h-screen bg-[var(--bg-color)]">
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        {/* Profile Header */}
-        <div className="flex flex-col items-center mb-10">
-          <img
-            src={profile.avatar}
-            alt={profile.name}
-            className="w-24 h-24 rounded-full object-cover border-2 border-white dark:border-zinc-700 shadow-lg"
-          />
-          <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
-            {profile.name}
-          </h1>
-          {profile.title && (
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              {profile.title}
-            </p>
-          )}
-          {profile.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3 justify-center">
+      <div className="app">
+        {/* Sidebar — same as editor but read-only */}
+        <aside className="sidebar">
+          <div className="profile">
+            <div className="avatar-wrapper">
+              <img src={profile.avatar} alt={profile.name} className="avatar" />
+            </div>
+
+            <h1 className="profile-name">{profile.name}</h1>
+
+            {profile.title && (
+              <p className="profile-title">{profile.title}</p>
+            )}
+
+            <ul className="profile-tags">
               {profile.tags.filter(Boolean).map((tag, i) => (
-                <span
-                  key={i}
-                  className="px-3 py-1 text-xs font-medium bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 rounded-full"
-                >
-                  {tag}
-                </span>
+                <li key={i}>{tag}</li>
               ))}
-            </div>
-          )}
-          {profile.bio && (
-            <p className="mt-4 text-sm text-gray-600 dark:text-gray-300 text-center max-w-md">
-              {profile.bio}
-            </p>
-          )}
-        </div>
+            </ul>
 
-        {/* Bento Grid - read-only */}
-        <div className="bento-grid">
-          {gridCards.map((card) => (
-            <div
-              key={card.id}
-              data-size={getSizeLabel(card)}
-              className={cn(
-                'bento-card public-card',
-                card.type === 'title' && 'title-widget-card'
-              )}
-            >
-              <div className="card-content-wrapper">
-                <PublicCardContent card={card} />
+            {profile.bio && (
+              <div className="bio-wrapper">
+                <p className="profile-bio">{profile.bio}</p>
               </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </div>
 
-        {/* Footer */}
-        <div className="mt-12 text-center">
-          <a
-            href="/"
-            className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-          >
-            Made with Open Bento
-          </a>
-        </div>
+          <footer className="sidebar-footer">
+            <a
+              href="/"
+              className="footer-btn"
+              title="Made with Open Bento"
+            >
+              <svg width="18" height="18" viewBox="0 0 32 32" fill="none">
+                <rect width="14" height="14" rx="4" fill="#10b981" />
+                <rect x="18" width="14" height="14" rx="4" fill="#10b981" opacity="0.5" />
+                <rect y="18" width="14" height="14" rx="4" fill="#10b981" opacity="0.5" />
+                <rect x="18" y="18" width="14" height="14" rx="4" fill="#10b981" opacity="0.3" />
+              </svg>
+            </a>
+            <span className="footer-views">@{username}</span>
+          </footer>
+        </aside>
+
+        {/* Grid — same layout as editor but no drag, no delete, no resize */}
+        <main className="main-content">
+          <div className="bento-grid">
+            {gridCards.map((card) => (
+              <div
+                key={card.id}
+                data-size={getSizeLabel(card)}
+                className={cn(
+                  'bento-card public-card',
+                  card.type === 'title' && 'title-widget-card'
+                )}
+              >
+                <div className="card-content-wrapper">
+                  <PublicCardContent card={card} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
       </div>
     </div>
   );
