@@ -157,26 +157,13 @@ export function Sidebar({ username, profileId }: SidebarProps) {
   };
 
   const handleBioInput = (e: React.FormEvent<HTMLParagraphElement>) => {
-    const text = e.currentTarget.textContent || '';
+    const text = e.currentTarget.innerText || '';
     const remaining = MAX_BIO_LENGTH - text.length;
     setCharCount(remaining);
-
-    // Limit to max length
-    if (text.length > MAX_BIO_LENGTH) {
-      e.currentTarget.textContent = text.substring(0, MAX_BIO_LENGTH);
-      // Move cursor to end
-      const range = document.createRange();
-      const sel = window.getSelection();
-      range.selectNodeContents(e.currentTarget);
-      range.collapse(false);
-      sel?.removeAllRanges();
-      sel?.addRange(range);
-      setCharCount(0);
-    }
   };
 
   const handleBioBlur = (e: React.FocusEvent<HTMLParagraphElement>) => {
-    const text = e.currentTarget.textContent || '';
+    const text = e.currentTarget.innerText || '';
     updateProfile({ bio: text.substring(0, MAX_BIO_LENGTH) });
   };
 
