@@ -74,28 +74,29 @@ export default async function ProfilePage({ params }: Props) {
     })
     .filter((c): c is NonNullable<typeof c> => c !== null);
 
-  // Track page view — truly fire-and-forget (don't await, don't block render)
-  headers().then((headersList) => {
-    const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim()
-      || headersList.get('x-real-ip')
-      || 'unknown';
-    const ipHash = createHash('sha256').update(ip).digest('hex');
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
+  // Track page view — fire-and-forget (read headers sync, DB calls not awaited)
+  const headersList = await headers();
+  const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || headersList.get('x-real-ip')
+    || 'unknown';
+  const ipHash = createHash('sha256').update(ip).digest('hex');
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const profileId = user.profile.id;
 
-    prisma.pageView.findFirst({
-      where: {
-        profileId: user.profile.id,
-        ipHash,
-        viewedAt: { gte: todayStart, lt: new Date(todayStart.getTime() + 86400000) },
-      },
-    }).then((existing) => {
-      if (!existing) {
-        prisma.pageView.create({
-          data: { profileId: user.profile.id, ipHash, viewedAt: new Date() },
-        }).catch(() => {});
-      }
-    }).catch(() => {});
+  // Don't await — let DB writes happen in background
+  prisma.pageView.findFirst({
+    where: {
+      profileId,
+      ipHash,
+      viewedAt: { gte: todayStart, lt: new Date(todayStart.getTime() + 86400000) },
+    },
+  }).then((existing) => {
+    if (!existing) {
+      prisma.pageView.create({
+        data: { profileId, ipHash, viewedAt: new Date() },
+      }).catch(() => {});
+    }
   }).catch(() => {});
 
   return <PublicProfile profile={profile} cards={cards} username={params.username} />;
