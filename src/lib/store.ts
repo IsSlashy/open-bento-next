@@ -53,10 +53,10 @@ interface BentoStore {
 
 const defaultProfile: Profile = {
   avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=default',
-  name: 'Your Name',
-  title: 'Your Title | Your Role',
-  tags: ['Tag 1', 'Tag 2', 'Tag 3'],
-  bio: 'Write something about yourself...',
+  name: '',
+  title: '',
+  tags: ['', '', ''],
+  bio: '',
 };
 
 const defaultCards: BentoCard[] = [
@@ -118,6 +118,62 @@ const defaultCards: BentoCard[] = [
   },
 ];
 
+const GRID_COLS = 4;
+
+// Find the first available grid position that fits a card of the given size
+function findNextAvailablePosition(cards: BentoCard[], size: Size): Position {
+  const occupied = new Set<string>();
+  for (const card of cards) {
+    for (let dx = 0; dx < card.size.width; dx++) {
+      for (let dy = 0; dy < card.size.height; dy++) {
+        occupied.add(`${card.position.x + dx},${card.position.y + dy}`);
+      }
+    }
+  }
+
+  for (let y = 0; y < 100; y++) {
+    for (let x = 0; x <= GRID_COLS - size.width; x++) {
+      let fits = true;
+      for (let dx = 0; dx < size.width && fits; dx++) {
+        for (let dy = 0; dy < size.height && fits; dy++) {
+          if (occupied.has(`${x + dx},${y + dy}`)) fits = false;
+        }
+      }
+      if (fits) return { x, y };
+    }
+  }
+
+  return { x: 0, y: 0 };
+}
+
+// Auto-assign positions when cards have overlapping positions (e.g. all at 0,0)
+function autoAssignPositions(cards: BentoCard[]): BentoCard[] {
+  if (cards.length === 0) return cards;
+
+  // Check if positions overlap
+  const cellSet = new Set<string>();
+  let hasOverlap = false;
+  for (const card of cards) {
+    for (let dx = 0; dx < card.size.width && !hasOverlap; dx++) {
+      for (let dy = 0; dy < card.size.height && !hasOverlap; dy++) {
+        const key = `${card.position.x + dx},${card.position.y + dy}`;
+        if (cellSet.has(key)) hasOverlap = true;
+        cellSet.add(key);
+      }
+    }
+  }
+
+  if (!hasOverlap) return cards;
+
+  // Reassign positions sequentially
+  const result: BentoCard[] = [];
+  for (const card of cards) {
+    const pos = findNextAvailablePosition(result, card.size);
+    result.push({ ...card, position: pos });
+  }
+  return result;
+}
+
 // Debounce helper
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 function debouncedSave(fn: () => void, delay = 1000) {
@@ -159,14 +215,16 @@ export const useBentoStore = create<BentoStore>()(
     hydrate: (profile, cards) => {
       set({
         profile,
-        cards,
+        cards: autoAssignPositions(cards),
         isHydrated: true,
       });
     },
 
     addCard: (card) => {
       const tempId = `temp-${Date.now()}`;
-      const newCard = { ...card, id: tempId };
+      // Find next available grid position
+      const position = findNextAvailablePosition(get().cards, card.size);
+      const newCard = { ...card, id: tempId, position };
 
       // Optimistic update
       set((state) => ({
@@ -176,8 +234,8 @@ export const useBentoStore = create<BentoStore>()(
       // Sync with API
       apiCall('/api/cards', 'POST', {
         type: card.type,
-        positionX: card.position.x,
-        positionY: card.position.y,
+        positionX: position.x,
+        positionY: position.y,
         sizeWidth: card.size.width,
         sizeHeight: card.size.height,
         content: card.content,
@@ -268,15 +326,33 @@ export const useBentoStore = create<BentoStore>()(
     },
 
     updateCardSize: (id, size) => {
-      set((state) => ({
-        cards: state.cards.map((c) => (c.id === id ? { ...c, size } : c)),
-      }));
+      set((state) => {
+        const card = state.cards.find((c) => c.id === id);
+        if (!card) return state;
+
+        // Clamp position so card stays within grid
+        let { x, y } = card.position;
+        if (x + size.width > GRID_COLS) {
+          x = Math.max(0, GRID_COLS - size.width);
+        }
+        const position = { x, y };
+
+        return {
+          cards: state.cards.map((c) =>
+            c.id === id ? { ...c, size, position } : c
+          ),
+        };
+      });
 
       if (id.startsWith('temp-')) return;
 
+      const card = get().cards.find((c) => c.id === id);
+      if (!card) return;
       apiCall(`/api/cards/${id}`, 'PUT', {
         sizeWidth: size.width,
         sizeHeight: size.height,
+        positionX: card.position.x,
+        positionY: card.position.y,
       }).then(() => set({ lastSaved: new Date() }));
     },
 
@@ -321,32 +397,42 @@ export const useBentoStore = create<BentoStore>()(
     },
 
     reorderCards: (activeId, overId) => {
+      // Swap positions of the two cards
       set((state) => {
-        const oldIndex = state.cards.findIndex((c) => c.id === activeId);
-        const newIndex = state.cards.findIndex((c) => c.id === overId);
+        const activeCard = state.cards.find((c) => c.id === activeId);
+        const overCard = state.cards.find((c) => c.id === overId);
+        if (!activeCard || !overCard) return state;
 
-        if (oldIndex === -1 || newIndex === -1) return state;
-
-        const cards = [...state.cards];
-        const [removed] = cards.splice(oldIndex, 1);
-        cards.splice(newIndex, 0, removed);
-
-        return { cards };
+        return {
+          cards: state.cards.map((c) => {
+            if (c.id === activeId) return { ...c, position: { ...overCard.position } };
+            if (c.id === overId) return { ...c, position: { ...activeCard.position } };
+            return c;
+          }),
+        };
       });
 
-      // Sync reorder with API
+      // Sync both cards' positions with API
       debouncedSave(() => {
-        const reorderData = get().cards.map((card, index) => ({
-          id: card.id,
-          sortOrder: index,
-        }));
-        // Filter out temp IDs
-        const validReorderData = reorderData.filter((d) => !d.id.startsWith('temp-'));
-        if (validReorderData.length > 0) {
-          apiCall('/api/cards/reorder', 'PUT', validReorderData).then(() =>
-            set({ lastSaved: new Date() })
-          );
+        const cards = get().cards;
+        const active = cards.find((c) => c.id === activeId);
+        const over = cards.find((c) => c.id === overId);
+        const updates: Promise<unknown>[] = [];
+
+        if (active && !active.id.startsWith('temp-')) {
+          updates.push(apiCall(`/api/cards/${active.id}`, 'PUT', {
+            positionX: active.position.x,
+            positionY: active.position.y,
+          }));
         }
+        if (over && !over.id.startsWith('temp-')) {
+          updates.push(apiCall(`/api/cards/${over.id}`, 'PUT', {
+            positionX: over.position.x,
+            positionY: over.position.y,
+          }));
+        }
+
+        Promise.all(updates).then(() => set({ lastSaved: new Date() }));
       }, 500);
     },
 

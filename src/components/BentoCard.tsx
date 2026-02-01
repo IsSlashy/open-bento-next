@@ -66,10 +66,10 @@ export function BentoCard({ card, isDragging }: BentoCardProps) {
     return `${width}x${height}`;
   };
 
-  // IMPORTANT:
-  // - Carte ORIGINALE (isDragging=true): transform: none, reste fixe
-  // - Autres cartes qui bougent: forcer scaleX/scaleY à 1 pour éviter déformation
+  // Position card explicitly on the CSS grid
   const style = {
+    gridColumn: `${card.position.x + 1} / span ${card.size.width}`,
+    gridRow: `${card.position.y + 1} / span ${card.size.height}`,
     transform: isDragging
       ? 'none'
       : CSS.Transform.toString(transform ? {

@@ -256,7 +256,7 @@ export function Sidebar({ username }: SidebarProps) {
           className="profile-name"
           contentEditable
           suppressContentEditableWarning
-          data-placeholder="Your Name"
+          data-placeholder="Your name"
           onBlur={(e) => updateProfile({ name: e.currentTarget.textContent || '' })}
         >
           {profile.name}
@@ -267,7 +267,7 @@ export function Sidebar({ username }: SidebarProps) {
           className="profile-title"
           contentEditable
           suppressContentEditableWarning
-          data-placeholder="Your title..."
+          data-placeholder="Title | Pronouns"
           onBlur={(e) => updateProfile({ title: e.currentTarget.textContent || '' })}
         >
           {profile.title}
@@ -280,7 +280,7 @@ export function Sidebar({ username }: SidebarProps) {
               key={index}
               contentEditable
               suppressContentEditableWarning
-              data-placeholder="Add tag..."
+              data-placeholder="Description"
               onBlur={(e) => updateTag(index, e.currentTarget.textContent || '')}
             >
               {tag}

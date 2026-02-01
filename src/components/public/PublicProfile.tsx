@@ -58,7 +58,7 @@ export function PublicProfile({ profile, cards, username }: PublicProfileProps) 
   const getSizeLabel = (card: BentoCardType) => `${card.size.width}x${card.size.height}`;
 
   return (
-    <div className="min-h-screen bg-[var(--bg-color)]">
+    <div className="min-h-screen">
       <div className="app">
         {/* Sidebar — same as editor but read-only */}
         <aside className="sidebar">
@@ -114,6 +114,10 @@ export function PublicProfile({ profile, cards, username }: PublicProfileProps) 
                   'bento-card public-card',
                   card.type === 'title' && 'title-widget-card'
                 )}
+                style={{
+                  gridColumn: `${card.position.x + 1} / span ${card.size.width}`,
+                  gridRow: `${card.position.y + 1} / span ${card.size.height}`,
+                }}
               >
                 <div className="card-content-wrapper">
                   <PublicCardContent card={card} />
