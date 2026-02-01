@@ -74,39 +74,29 @@ export default async function ProfilePage({ params }: Props) {
     })
     .filter((c): c is NonNullable<typeof c> => c !== null);
 
-  // Track page view server-side (fire-and-forget)
-  try {
-    const headersList = await headers();
+  // Track page view — truly fire-and-forget (don't await, don't block render)
+  headers().then((headersList) => {
     const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim()
       || headersList.get('x-real-ip')
       || 'unknown';
     const ipHash = createHash('sha256').update(ip).digest('hex');
-    const today = new Date();
-    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
 
-    const existing = await prisma.pageView.findFirst({
+    prisma.pageView.findFirst({
       where: {
         profileId: user.profile.id,
         ipHash,
-        viewedAt: {
-          gte: todayStart,
-          lt: new Date(todayStart.getTime() + 86400000),
-        },
+        viewedAt: { gte: todayStart, lt: new Date(todayStart.getTime() + 86400000) },
       },
-    });
-
-    if (!existing) {
-      await prisma.pageView.create({
-        data: {
-          profileId: user.profile.id,
-          ipHash,
-          viewedAt: new Date(),
-        },
-      });
-    }
-  } catch (err) {
-    console.error('View tracking error:', err);
-  }
+    }).then((existing) => {
+      if (!existing) {
+        prisma.pageView.create({
+          data: { profileId: user.profile.id, ipHash, viewedAt: new Date() },
+        }).catch(() => {});
+      }
+    }).catch(() => {});
+  }).catch(() => {});
 
   return <PublicProfile profile={profile} cards={cards} username={params.username} />;
 }
