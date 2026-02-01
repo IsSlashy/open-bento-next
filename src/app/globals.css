@@ -12,6 +12,7 @@
 
 :root {
   --bg-color: #f5f5f5;
+  --bg-secondary: #e5e7eb;
   --card-bg: #ffffff;
   --text-primary: #1a1a1a;
   --text-secondary: #6b7280;
@@ -20,6 +21,7 @@
   --border-radius: 16px;
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --accent-color: #3b82f6;
 
   /* Brand colors */
   --instagram-pink: #e1306c;
@@ -29,6 +31,21 @@
   --github-black: #24292f;
   --kofi-yellow: #ffdd00;
   --bento-green: #10b981;
+}
+
+.dark {
+  --bg-color: #18181b;
+  --bg-secondary: #27272a;
+  --card-bg: #27272a;
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --border-color: #3f3f46;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --accent-color: #60a5fa;
+  --tiktok-black: #ffffff;
+  --github-black: #fafafa;
 }
 
 html, body {

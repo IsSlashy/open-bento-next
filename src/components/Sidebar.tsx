@@ -2,8 +2,10 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { signOut } from 'next-auth/react';
 import { useBentoStore } from '@/lib/store';
-import { HelpCircle, Upload, Trash2, X, Check, LogOut, Download } from 'lucide-react';
+import { useTheme } from '@/components/providers/ThemeProvider';
+import { HelpCircle, Upload, Trash2, X, Check, LogOut, Download, Moon, Sun, UploadCloud } from 'lucide-react';
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 
@@ -19,6 +21,7 @@ function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: numbe
 
 export function Sidebar() {
   const { profile, updateProfile } = useBentoStore();
+  const { resolvedTheme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bioRef = useRef<HTMLParagraphElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -324,25 +327,78 @@ export function Sidebar() {
 
           {/* Settings Menu */}
           {showSettingsMenu && (
-            <div className="settings-menu">
-              <button className="settings-item">
-                <span className="settings-item-label">Change Username</span>
-                <span className="settings-item-value">@{profile.name?.toLowerCase().replace(/\s/g, '') || 'user'}</span>
-              </button>
-              <button className="settings-item">
-                <span className="settings-item-label">Change Email</span>
-                <span className="settings-item-value">user@example.com</span>
-              </button>
-              <button className="settings-item">
-                <span className="settings-item-label">Change Password</span>
-                <span className="settings-item-value">••••••••</span>
+            <div className="settings-menu" role="menu">
+              <button
+                className="settings-item"
+                onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+                role="menuitem"
+              >
+                {resolvedTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                <span className="settings-item-label">
+                  {resolvedTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                </span>
               </button>
               <div className="settings-divider"></div>
-              <button className="settings-item">
+              <button
+                className="settings-item"
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/api/export');
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `openbento-export-${new Date().toISOString().slice(0, 10)}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  } catch (err) {
+                    console.error('Export failed:', err);
+                  }
+                  setShowSettingsMenu(false);
+                }}
+                role="menuitem"
+              >
                 <Download className="w-4 h-4" />
                 <span className="settings-item-label">Export Data</span>
               </button>
-              <button className="settings-item settings-item-danger">
+              <button
+                className="settings-item"
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = '.json';
+                  input.onchange = async (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (!file) return;
+                    try {
+                      const text = await file.text();
+                      const data = JSON.parse(text);
+                      const res = await fetch('/api/import', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                      });
+                      if (res.ok) {
+                        window.location.reload();
+                      }
+                    } catch (err) {
+                      console.error('Import failed:', err);
+                    }
+                  };
+                  input.click();
+                  setShowSettingsMenu(false);
+                }}
+                role="menuitem"
+              >
+                <UploadCloud className="w-4 h-4" />
+                <span className="settings-item-label">Import Data</span>
+              </button>
+              <div className="settings-divider"></div>
+              <button
+                className="settings-item settings-item-danger"
+                onClick={() => signOut({ callbackUrl: '/' })}
+                role="menuitem"
+              >
                 <LogOut className="w-4 h-4" />
                 <span className="settings-item-label">Log Out</span>
               </button>

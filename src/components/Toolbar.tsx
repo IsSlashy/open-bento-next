@@ -7,7 +7,11 @@ import { Image, MapPin, Link, Trash2, Monitor, Smartphone, Type } from 'lucide-r
 import { compressImage } from '@/lib/utils';
 import { LinkInput } from './LinkInput';
 
-export function Toolbar() {
+interface ToolbarProps {
+  username?: string;
+}
+
+export function Toolbar({ username }: ToolbarProps) {
   const { addCard, resetCards } = useBentoStore();
 
   const [showToast, setShowToast] = useState(false);
@@ -22,12 +26,20 @@ export function Toolbar() {
     setTimeout(() => setShowToast(false), 2500);
   };
 
+  const getShareUrl = () => {
+    if (username) {
+      return `${window.location.origin}/${username}`;
+    }
+    return window.location.href;
+  };
+
   const handleShare = async () => {
+    const url = getShareUrl();
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'My Bento Portfolio',
-          url: window.location.href,
+          url,
         });
       } catch {
         // User cancelled
@@ -38,7 +50,7 @@ export function Toolbar() {
   };
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(window.location.href);
+    await navigator.clipboard.writeText(getShareUrl());
     toast('Link copied to clipboard!');
   };
 
