@@ -39,6 +39,13 @@ const socialContentSchema = z.object({
   icon: z.string(),
 });
 
+const cropAreaSchema = z.object({
+  x: z.number().min(0).max(1),
+  y: z.number().min(0).max(1),
+  width: z.number().min(0).max(1),
+  height: z.number().min(0).max(1),
+});
+
 const mediaContentSchema = z.object({
   type: z.enum(['image', 'video', 'gif']),
   url: z.string(),
@@ -46,6 +53,7 @@ const mediaContentSchema = z.object({
   overlayText: z.string().optional(),
   objectPosition: z.object({ x: z.number(), y: z.number() }).optional(),
   objectScale: z.number().optional(),
+  cropArea: cropAreaSchema.optional(),
 });
 
 const mapContentSchema = z.object({

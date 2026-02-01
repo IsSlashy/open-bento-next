@@ -47,14 +47,22 @@ export interface SocialContent {
   icon: string;
 }
 
+export interface CropArea {
+  x: number; y: number; width: number; height: number;
+  // All values 0-1, fractions of the original image
+  // x,y = top-left corner of crop, width/height = crop size
+}
+
 export interface MediaContent {
   type: 'image' | 'video' | 'gif';
   url: string;
   alt?: string;
   overlayText?: string;
-  // Position properties (for cropping/repositioning)
+  // Position properties (legacy — used if cropArea is absent)
   objectPosition?: { x: number; y: number }; // -50 to 50, default 0
   objectScale?: number; // 100 to 200, default 100
+  // Inline crop (new)
+  cropArea?: CropArea;
 }
 
 export interface MapContent {

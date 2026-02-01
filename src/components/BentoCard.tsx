@@ -12,7 +12,8 @@ import { MediaCard } from './cards/MediaCard';
 import { MapCard } from './cards/MapCard';
 import { TitleCard } from './cards/TitleCard';
 import { cn } from '@/lib/utils';
-import { Trash2, Move } from 'lucide-react';
+import { Trash2, Crop } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 interface BentoCardProps {
   card: BentoCardType;
@@ -52,6 +53,23 @@ function CardContent({ card }: { card: BentoCardType }) {
 export function BentoCard({ card, isDragging }: BentoCardProps) {
   const { updateCardSize, removeCard } = useBentoStore();
   const isTitle = card.type === 'title';
+  const [cropActive, setCropActive] = useState(false);
+
+  // Listen for crop-mode events
+  useEffect(() => {
+    const onStart = (e: Event) => {
+      if ((e as CustomEvent).detail?.cardId === card.id) setCropActive(true);
+    };
+    const onEnd = (e: Event) => {
+      if ((e as CustomEvent).detail?.cardId === card.id) setCropActive(false);
+    };
+    document.addEventListener('crop-mode-start', onStart);
+    document.addEventListener('crop-mode-end', onEnd);
+    return () => {
+      document.removeEventListener('crop-mode-start', onStart);
+      document.removeEventListener('crop-mode-end', onEnd);
+    };
+  }, [card.id]);
 
   const {
     attributes,
@@ -108,12 +126,13 @@ export function BentoCard({ card, isDragging }: BentoCardProps) {
       data-size={getSizeLabel()}
       data-card-id={card.id}
       data-is-dragging={isDragging ? 'true' : undefined}
+      data-crop-active={cropActive ? 'true' : undefined}
       className={cn(
         'bento-card',
         isTitle && 'title-widget-card'
       )}
       {...attributes}
-      {...listeners}
+      {...(cropActive ? {} : listeners)}
     >
       {/* Delete Button - OUTSIDE top left */}
       <button
@@ -151,9 +170,9 @@ export function BentoCard({ card, isDragging }: BentoCardProps) {
               <button
                 className="size-btn reposition-btn"
                 onClick={handleReposition}
-                title="Repositionner"
+                title="Crop"
               >
-                <Move className="w-3 h-3" style={{ color: 'rgba(255,255,255,0.7)' }} />
+                <Crop className="w-3 h-3" style={{ color: 'rgba(255,255,255,0.7)' }} />
               </button>
             </>
           )}
