@@ -84,6 +84,17 @@ export function MediaCard({ cardId, content }: MediaCardProps) {
     document.dispatchEvent(new CustomEvent('crop-mode-end', { detail: { cardId } }));
   };
 
+  // No URL — show empty placeholder (card was stripped due to oversized data)
+  if (!content.url) {
+    return (
+      <div className="media-card" ref={containerRef}>
+        <div className="w-full h-full flex items-center justify-center bg-black/20 text-white/40 text-xs">
+          Media unavailable
+        </div>
+      </div>
+    );
+  }
+
   // Video — no crop support
   if (isVideo) {
     return (

@@ -40,7 +40,12 @@ export default async function EditorPage() {
   }
 
   const clientProfile = dbProfileToClient(profile);
-  const clientCards = profile.cards.map(dbCardToClient);
+  const clientCards = profile.cards
+    .map((card) => {
+      try { return dbCardToClient(card); }
+      catch { return null; }
+    })
+    .filter((c): c is NonNullable<typeof c> => c !== null);
 
   return (
     <EditorClient

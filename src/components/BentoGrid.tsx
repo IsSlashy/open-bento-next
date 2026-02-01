@@ -132,8 +132,15 @@ export function BentoGrid() {
 
         if (!isVideo && !isImage) continue;
 
-        // Pour les vidéos et GIFs, lire directement (pas de compression)
-        if (isVideo || isGif) {
+        // Videos are too large to store as data-URLs and there is no
+        // cloud storage configured — reject them with a user-visible alert.
+        if (isVideo) {
+          alert('Video uploads are not supported yet. Please upload images or GIFs instead.');
+          continue;
+        }
+
+        // GIFs — read directly (no compression)
+        if (isGif) {
           const reader = new FileReader();
           reader.onload = () => {
             const dataUrl = reader.result as string;
@@ -144,7 +151,7 @@ export function BentoGrid() {
               content: {
                 type: 'media',
                 data: {
-                  type: isVideo ? 'video' : 'gif',
+                  type: 'gif',
                   url: dataUrl,
                   alt: file.name,
                 },

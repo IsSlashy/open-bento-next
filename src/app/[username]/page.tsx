@@ -67,7 +67,12 @@ export default async function ProfilePage({ params }: Props) {
   }
 
   const profile = dbProfileToClient(user.profile);
-  const cards = user.profile.cards.map(dbCardToClient);
+  const cards = user.profile.cards
+    .map((card) => {
+      try { return dbCardToClient(card); }
+      catch { return null; }
+    })
+    .filter((c): c is NonNullable<typeof c> => c !== null);
 
   // Track page view server-side (fire-and-forget)
   try {

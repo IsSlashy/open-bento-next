@@ -1,15 +1,35 @@
 import { Card as PrismaCard, Profile as PrismaProfile, CardType as PrismaCardType } from '@prisma/client';
 import { BentoCard, CardContent, CardStyle, CardType } from './types';
 
+// Max data-URL length we allow through (~500 KB base64 ≈ ~375 KB binary).
+// Anything larger was likely a video/file stored inline by mistake and will
+// crash serialisation or the browser.  Strip the URL so the card renders as
+// a broken placeholder the user can delete.
+const MAX_DATA_URL_LENGTH = 500_000;
+
 // Convert Prisma Card to client BentoCard
 // Migration from 4-col to 8-col is handled by the store's hydrate function.
 export function dbCardToClient(card: PrismaCard): BentoCard {
+  let content = card.content as unknown as CardContent;
+
+  // Guard against oversized inline data-URLs (e.g. videos stored as base64)
+  if (content?.type === 'media') {
+    const data = (content as { type: 'media'; data: Record<string, unknown> }).data;
+    const url = data?.url as string | undefined;
+    if (url && url.startsWith('data:') && url.length > MAX_DATA_URL_LENGTH) {
+      content = {
+        ...content,
+        data: { ...data, url: '', type: data.type },
+      } as CardContent;
+    }
+  }
+
   return {
     id: card.id,
     type: card.type as CardType,
     position: { x: card.positionX, y: card.positionY },
     size: { width: card.sizeWidth, height: card.sizeHeight },
-    content: card.content as unknown as CardContent,
+    content,
     style: card.style as unknown as CardStyle | undefined,
     zIndex: card.zIndex,
   };
