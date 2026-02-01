@@ -1,13 +1,33 @@
 import { Card as PrismaCard, Profile as PrismaProfile, CardType as PrismaCardType } from '@prisma/client';
 import { BentoCard, CardContent, CardStyle, CardType } from './types';
 
+const GRID_COLS = 8;
+
+// Migrate a single card from old 4-col layout to 8-col layout.
+// Idempotent: if the card already has values that exceed the old 4-col bounds, skip.
+function migrateCardToEightCol(posX: number, posY: number, w: number, h: number) {
+  if (posX + w > 4 || w > 4 || h > 2) {
+    // Already migrated
+    return { x: posX, y: posY, width: w, height: h };
+  }
+  const newW = w * 2;
+  const newH = h * 2;
+  let newX = posX * 2;
+  // Clamp so card doesn't overflow 8 columns
+  if (newX + newW > GRID_COLS) {
+    newX = Math.max(0, GRID_COLS - newW);
+  }
+  return { x: newX, y: posY * 2, width: newW, height: newH };
+}
+
 // Convert Prisma Card to client BentoCard
 export function dbCardToClient(card: PrismaCard): BentoCard {
+  const migrated = migrateCardToEightCol(card.positionX, card.positionY, card.sizeWidth, card.sizeHeight);
   return {
     id: card.id,
     type: card.type as CardType,
-    position: { x: card.positionX, y: card.positionY },
-    size: { width: card.sizeWidth, height: card.sizeHeight },
+    position: { x: migrated.x, y: migrated.y },
+    size: { width: migrated.width, height: migrated.height },
     content: card.content as unknown as CardContent,
     style: card.style as unknown as CardStyle | undefined,
     zIndex: card.zIndex,

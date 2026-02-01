@@ -1,7 +1,7 @@
 // Bento Card Types
 export type CardType = 'profile' | 'social' | 'media' | 'map' | 'github' | 'text' | 'link' | 'title';
 
-export type CardSize = '1x1' | '2x1' | '1x2' | '2x2' | '3x1' | '4x1' | '3x2' | '4x2';
+export type CardSize = '2x2' | '4x2' | '2x4' | '4x4' | '6x2' | '8x2' | '6x4' | '8x4';
 
 export interface Position {
   x: number;
@@ -9,8 +9,8 @@ export interface Position {
 }
 
 export interface Size {
-  width: number;  // in grid units (1-4)
-  height: number; // in grid units (1-2)
+  width: number;  // in grid units (1-8)
+  height: number; // in grid units (1-8)
 }
 
 export interface OverlayConfig {
@@ -122,21 +122,21 @@ export interface BentoState {
 
 // Predefined sizes
 export const CARD_SIZES: Record<CardSize, Size> = {
-  '1x1': { width: 1, height: 1 },
-  '2x1': { width: 2, height: 1 },
-  '3x1': { width: 3, height: 1 },
-  '4x1': { width: 4, height: 1 },
-  '1x2': { width: 1, height: 2 },
   '2x2': { width: 2, height: 2 },
-  '3x2': { width: 3, height: 2 },
   '4x2': { width: 4, height: 2 },
+  '2x4': { width: 2, height: 4 },
+  '4x4': { width: 4, height: 4 },
+  '6x2': { width: 6, height: 2 },
+  '8x2': { width: 8, height: 2 },
+  '6x4': { width: 6, height: 4 },
+  '8x4': { width: 8, height: 4 },
 };
 
 export const GRID_CONFIG = {
-  columns: 12,
-  gap: 16,
+  columns: 8,
+  gap: 12,
   maxWidth: 1200,
   cardRadius: 24,
-  minCardSize: { width: 1, height: 1 },
-  maxCardSize: { width: 4, height: 2 },
+  minCardSize: { width: 2, height: 2 },
+  maxCardSize: { width: 8, height: 8 },
 };

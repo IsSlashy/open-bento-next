@@ -111,7 +111,7 @@ export function BentoGrid() {
             addCard({
               type: 'media',
               position: { x: 0, y: 0 },
-              size: { width: 2, height: 2 },
+              size: { width: 4, height: 4 },
               content: {
                 type: 'media',
                 data: {

@@ -69,7 +69,7 @@ export function Toolbar({ username }: ToolbarProps) {
           addCard({
             type: 'media',
             position: { x: 0, y: 0 },
-            size: { width: 2, height: 2 },
+            size: { width: 4, height: 4 },
             content: {
               type: 'media',
               data: {
@@ -89,7 +89,7 @@ export function Toolbar({ username }: ToolbarProps) {
           addCard({
             type: 'media',
             position: { x: 0, y: 0 },
-            size: { width: 2, height: 2 },
+            size: { width: 4, height: 4 },
             content: {
               type: 'media',
               data: {
@@ -108,7 +108,7 @@ export function Toolbar({ username }: ToolbarProps) {
         addCard({
           type: 'media',
           position: { x: 0, y: 0 },
-          size: { width: 2, height: 2 },
+          size: { width: 4, height: 4 },
           content: {
             type: 'media',
             data: {
@@ -134,7 +134,7 @@ export function Toolbar({ username }: ToolbarProps) {
           addCard({
             type: 'map',
             position: { x: 0, y: 0 },
-            size: { width: 2, height: 1 },
+            size: { width: 4, height: 2 },
             content: {
               type: 'map',
               data: {
@@ -150,7 +150,7 @@ export function Toolbar({ username }: ToolbarProps) {
           addCard({
             type: 'map',
             position: { x: 0, y: 0 },
-            size: { width: 2, height: 1 },
+            size: { width: 4, height: 2 },
             content: {
               type: 'map',
               data: {
@@ -170,7 +170,7 @@ export function Toolbar({ username }: ToolbarProps) {
     addCard({
       type: 'title',
       position: { x: 0, y: 0 },
-      size: { width: 4, height: 1 },
+      size: { width: 8, height: 2 },
       content: {
         type: 'title',
         data: {

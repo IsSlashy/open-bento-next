@@ -64,61 +64,77 @@ const defaultCards: BentoCard[] = [
     id: 'title-links',
     type: 'title',
     position: { x: 0, y: 0 },
-    size: { width: 4, height: 1 },
+    size: { width: 8, height: 2 },
     content: { type: 'title', data: { text: 'My Links' } },
   },
   {
     id: 'social-1',
     type: 'social',
-    position: { x: 0, y: 1 },
-    size: { width: 1, height: 1 },
+    position: { x: 0, y: 2 },
+    size: { width: 2, height: 2 },
     content: { type: 'social', data: { platform: 'twitter', username: '@username', url: 'https://x.com/', icon: 'twitter' } },
   },
   {
     id: 'social-2',
     type: 'social',
-    position: { x: 1, y: 1 },
-    size: { width: 1, height: 1 },
+    position: { x: 2, y: 2 },
+    size: { width: 2, height: 2 },
     content: { type: 'social', data: { platform: 'instagram', username: '@username', url: 'https://instagram.com/', icon: 'instagram' } },
   },
   {
     id: 'social-3',
     type: 'social',
-    position: { x: 2, y: 1 },
-    size: { width: 1, height: 1 },
+    position: { x: 4, y: 2 },
+    size: { width: 2, height: 2 },
     content: { type: 'social', data: { platform: 'youtube', username: '@channel', url: 'https://youtube.com/', icon: 'youtube' } },
   },
   {
     id: 'social-4',
     type: 'social',
-    position: { x: 3, y: 1 },
-    size: { width: 1, height: 1 },
+    position: { x: 6, y: 2 },
+    size: { width: 2, height: 2 },
     content: { type: 'social', data: { platform: 'tiktok', username: '@username', url: 'https://tiktok.com/', icon: 'tiktok' } },
   },
   {
     id: 'title-about',
     type: 'title',
-    position: { x: 0, y: 2 },
-    size: { width: 4, height: 1 },
+    position: { x: 0, y: 4 },
+    size: { width: 8, height: 2 },
     content: { type: 'title', data: { text: 'About' } },
   },
   {
     id: 'text-about',
     type: 'text',
-    position: { x: 0, y: 3 },
-    size: { width: 2, height: 1 },
+    position: { x: 0, y: 6 },
+    size: { width: 4, height: 2 },
     content: { type: 'text', data: { title: 'About Me', body: 'Add a description about yourself here. Click to edit!' } },
   },
   {
     id: 'map-1',
     type: 'map',
-    position: { x: 2, y: 3 },
-    size: { width: 2, height: 1 },
+    position: { x: 4, y: 6 },
+    size: { width: 4, height: 2 },
     content: { type: 'map', data: { lat: 48.8566, lng: 2.3522, zoom: 12, style: 'light' } },
   },
 ];
 
-const GRID_COLS = 4;
+const GRID_COLS = 8;
+
+// Migrate cards from old 4-col grid to 8-col grid by doubling positions and sizes.
+// Idempotent: skips if cards already appear to use the 8-col layout.
+function migrateToEightCol(cards: BentoCard[]): BentoCard[] {
+  if (cards.length === 0) return cards;
+
+  // If any card's right edge exceeds 4, data is already in 8-col format
+  const maxRight = Math.max(...cards.map((c) => c.position.x + c.size.width));
+  if (maxRight > 4) return cards;
+
+  return cards.map((c) => ({
+    ...c,
+    position: { x: c.position.x * 2, y: c.position.y * 2 },
+    size: { width: c.size.width * 2, height: c.size.height * 2 },
+  }));
+}
 
 // Build occupancy set from cards (optionally excluding some IDs)
 function buildOccupied(cards: BentoCard[], excludeIds: string[] = []): Set<string> {
@@ -225,9 +241,10 @@ export const useBentoStore = create<BentoStore>()(
     isHydrated: false,
 
     hydrate: (profile, cards) => {
+      const migrated = migrateToEightCol(cards);
       set({
         profile,
-        cards: autoAssignPositions(cards),
+        cards: autoAssignPositions(migrated),
         isHydrated: true,
       });
     },

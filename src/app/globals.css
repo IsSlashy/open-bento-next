@@ -533,9 +533,8 @@ body {
 /* ==================== BENTO GRID ==================== */
 .bento-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  row-gap: 56px; /* Extra space for size selector below cards */
+  grid-template-columns: repeat(8, 1fr);
+  gap: 12px;
   grid-auto-rows: minmax(80px, auto);
   /* No auto-flow: cards are positioned explicitly via grid-column/grid-row */
   width: 100%;
@@ -591,15 +590,15 @@ body {
   transition: box-shadow 0.3s ease;
 }
 
-/* Size variants */
-.bento-card[data-size="1x1"] { grid-column: span 1; }
-.bento-card[data-size="2x1"] { grid-column: span 2; }
-.bento-card[data-size="3x1"] { grid-column: span 3; }
-.bento-card[data-size="4x1"] { grid-column: span 4; }
-.bento-card[data-size="1x2"] { grid-column: span 1; grid-row: span 2; }
+/* Size variants (8-col grid) */
 .bento-card[data-size="2x2"] { grid-column: span 2; grid-row: span 2; }
-.bento-card[data-size="3x2"] { grid-column: span 3; grid-row: span 2; }
 .bento-card[data-size="4x2"] { grid-column: span 4; grid-row: span 2; }
+.bento-card[data-size="2x4"] { grid-column: span 2; grid-row: span 4; }
+.bento-card[data-size="4x4"] { grid-column: span 4; grid-row: span 4; }
+.bento-card[data-size="6x2"] { grid-column: span 6; grid-row: span 2; }
+.bento-card[data-size="8x2"] { grid-column: span 8; grid-row: span 2; }
+.bento-card[data-size="6x4"] { grid-column: span 6; grid-row: span 4; }
+.bento-card[data-size="8x4"] { grid-column: span 8; grid-row: span 4; }
 
 /* Title widget card */
 .bento-card.title-widget-card {
@@ -1719,8 +1718,12 @@ body {
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1200px) {
   .bento-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(6, 1fr);
   }
+
+  /* Clamp 8-wide cards to 6 */
+  .bento-card[data-size="8x2"] { grid-column: span 6; }
+  .bento-card[data-size="8x4"] { grid-column: span 6; }
 
   .app {
     gap: 40px;
@@ -1754,8 +1757,14 @@ body {
   }
 
   .bento-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
+
+  /* Clamp 6+ wide cards to 4 */
+  .bento-card[data-size="6x2"] { grid-column: span 4; }
+  .bento-card[data-size="6x4"] { grid-column: span 4; }
+  .bento-card[data-size="8x2"] { grid-column: span 4; }
+  .bento-card[data-size="8x4"] { grid-column: span 4; }
 
   .toolbar {
     left: 20px;
@@ -1767,13 +1776,17 @@ body {
 
 @media (max-width: 600px) {
   .bento-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .bento-card[data-size="2x1"],
-  .bento-card[data-size="2x2"] {
-    grid-column: span 1;
-  }
+  /* Clamp all wide cards to 2 cols, tall cards to 2 rows */
+  .bento-card[data-size="4x2"] { grid-column: span 2; }
+  .bento-card[data-size="4x4"] { grid-column: span 2; grid-row: span 2; }
+  .bento-card[data-size="6x2"] { grid-column: span 2; }
+  .bento-card[data-size="6x4"] { grid-column: span 2; grid-row: span 2; }
+  .bento-card[data-size="8x2"] { grid-column: span 2; }
+  .bento-card[data-size="8x4"] { grid-column: span 2; grid-row: span 2; }
+  .bento-card[data-size="2x4"] { grid-row: span 2; }
 
   .share-btn span {
     display: none;

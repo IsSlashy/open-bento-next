@@ -141,7 +141,7 @@ export function LinkInput({ onClose, onSuccess }: LinkInputProps) {
         addCard({
           type: 'social',
           position: { x: 0, y: 0 },
-          size: { width: 1, height: 1 },
+          size: { width: 2, height: 2 },
           content: {
             type: 'social',
             data: {
@@ -158,7 +158,7 @@ export function LinkInput({ onClose, onSuccess }: LinkInputProps) {
         addCard({
           type: 'github',
           position: { x: 0, y: 0 },
-          size: { width: 2, height: 2 },
+          size: { width: 4, height: 4 },
           content: {
             type: 'github',
             data: {
@@ -174,7 +174,7 @@ export function LinkInput({ onClose, onSuccess }: LinkInputProps) {
         addCard({
           type: 'link',
           position: { x: 0, y: 0 },
-          size: { width: 2, height: 1 },
+          size: { width: 4, height: 2 },
           content: {
             type: 'link',
             data: {

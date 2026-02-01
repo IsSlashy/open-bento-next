@@ -68,11 +68,11 @@ export function EditPanel() {
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { w: 1, h: 1, label: '1x1' },
-                  { w: 2, h: 1, label: '2x1' },
                   { w: 2, h: 2, label: '2x2' },
-                  { w: 3, h: 2, label: '3x2' },
                   { w: 4, h: 2, label: '4x2' },
+                  { w: 4, h: 4, label: '4x4' },
+                  { w: 6, h: 4, label: '6x4' },
+                  { w: 8, h: 4, label: '8x4' },
                 ].map(({ w, h, label }) => (
                   <button
                     key={label}

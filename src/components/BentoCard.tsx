@@ -20,10 +20,10 @@ interface BentoCardProps {
 }
 
 const sizeOptions: Array<{ label: string; size: Size; shapeClass: string }> = [
-  { label: '1x1', size: { width: 1, height: 1 }, shapeClass: 'shape-1x1' },
-  { label: '2x1', size: { width: 2, height: 1 }, shapeClass: 'shape-2x1' },
-  { label: '2x2', size: { width: 2, height: 2 }, shapeClass: 'shape-2x2' },
-  { label: '1x2', size: { width: 1, height: 2 }, shapeClass: 'shape-1x2' },
+  { label: '2x2', size: { width: 2, height: 2 }, shapeClass: 'shape-1x1' },
+  { label: '4x2', size: { width: 4, height: 2 }, shapeClass: 'shape-2x1' },
+  { label: '4x4', size: { width: 4, height: 4 }, shapeClass: 'shape-2x2' },
+  { label: '2x4', size: { width: 2, height: 4 }, shapeClass: 'shape-1x2' },
 ];
 
 // Card content renderer
